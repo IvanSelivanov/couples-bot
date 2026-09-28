@@ -8,6 +8,12 @@
       "experimentalTriggers": [
         { "type": "queue/v2beta", "topic": "updates", "retryAfterSeconds": 30 }
       ]
+    },
+    "api/queue-debounce.js": {
+      "maxDuration": 300,
+      "experimentalTriggers": [
+        { "type": "queue/v2beta", "topic": "debounce", "retryAfterSeconds": 10 }
+      ]
     }
   }
 }
