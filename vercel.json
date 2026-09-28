@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 300
+    },
+    "api/queue-updates.js": {
+      "maxDuration": 300,
+      "experimentalTriggers": [
+        { "type": "queue/v2beta", "topic": "updates", "retryAfterSeconds": 30 }
+      ]
+    }
+  }
+}
