@@ -1,0 +1,26 @@
+{
+  "name": "couples-bot",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "bot": "node --env-file=.env bot.js",
+    "test": "vitest run --project unit",
+    "test:db": "vitest run --project db --no-file-parallelism",
+    "test:watch": "vitest --project unit",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "spike:guest": "node --env-file=.env spikes/guest-mode.js"
+  },
+  "dependencies": {
+    "@vercel/functions": "^3.9.9"
+  },
+  "devDependencies": {
+    "postgres": "^3.4.9",
+    "supabase": "^2.118.0",
+    "vitest": "^3.2.7"
+  }
+}

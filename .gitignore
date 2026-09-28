@@ -1,0 +1,12 @@
+# Звёздочка обязательна: vercel env pull пишет в .env.local,
+# и голый шаблон .env его не покрывает.
+.env*
+!.env.example
+
+node_modules/
+.vercel
+*.log
+.DS_Store
+.claude/settings.local.json
+supabase/.temp
+supabase/.branches
