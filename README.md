@@ -51,11 +51,11 @@ npm run eval                # промпты на живой модели, ну�
 
 ## Деплой
 
-1. **Supabase.** Создать проект в регионе ближе к паре. Применить миграции:
+1. **Supabase.** Создать проект в регионе **eu-central-1 (Frankfurt)** — рядом с
+   функциями Vercel `fra1` (T13). Применить миграции:
    `npx supabase link --project-ref <ref>` и `npx supabase db push`.
-2. **Vercel.** Создать проект из этого репо. Регион функций — тот же, что у
-   Supabase: `"regions": ["fra1"]` в `vercel.json` (для eu-central-1).
-   Включить Vercel Queues для проекта.
+2. **Vercel.** Создать проект из этого репо. Регион функций уже задан:
+   `"regions": ["fra1"]` в `vercel.json`. Включить Vercel Queues для проекта.
 3. **Переменные** в Vercel — все из `.env.example`, кроме `SPIKE_*` и `EVAL_*`.
    `DM_ENCRYPTION_KEY` сохранить ещё где-нибудь вне Vercel: потерянный ключ =
    потерянные лички.
