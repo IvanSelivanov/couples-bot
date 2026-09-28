@@ -4,7 +4,7 @@
 import { waitUntil } from "@vercel/functions";
 import { acceptUpdate, processUpdate, UPDATES_TOPIC } from "../lib/ingest.js";
 import { handleUpdate } from "../lib/handle.js";
-import { send } from "../lib/queue.js";
+import { send, vercelEnv } from "../lib/queue.js";
 
 export default async function handler(request, response) {
   // Секрет первой строкой: чужие запросы не должны тратить ни очередь, ни базу.
@@ -19,7 +19,7 @@ export default async function handler(request, response) {
   const status = await acceptUpdate(update, {
     enqueue: (message, options) => send(UPDATES_TOPIC, message, options),
     defer: waitUntil,
-    process: (u) => processUpdate(u, { handle: handleUpdate }),
+    process: (u) => processUpdate(u, { handle: (x) => handleUpdate(x, vercelEnv()) }),
   });
 
   response.status(status).json({ ok: status === 200 });

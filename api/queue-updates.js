@@ -4,7 +4,7 @@
 
 import { openUpdate, processUpdate } from "../lib/ingest.js";
 import { handleUpdate } from "../lib/handle.js";
-import { handleNodeCallback } from "../lib/queue.js";
+import { handleNodeCallback, vercelEnv } from "../lib/queue.js";
 import { CryptoError } from "../lib/crypto.js";
 
 // Потолок повторов: после него апдейт считается безнадёжным. Сутки хранения
@@ -14,7 +14,7 @@ const MAX_DELIVERIES = 12;
 export default handleNodeCallback(
   async ({ updateId, payload }) => {
     const update = openUpdate(updateId, payload);
-    await processUpdate(update, { handle: handleUpdate });
+    await processUpdate(update, { handle: (u) => handleUpdate(u, vercelEnv()) });
   },
   {
     retry: (error, metadata) => {

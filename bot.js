@@ -39,7 +39,7 @@ for (;;) {
 
   for (const update of updates) {
     offset = update.update_id + 1;
-    processUpdate(update, { handle: handleUpdate }).catch((error) => {
+    processUpdate(update, { handle: (u) => handleUpdate(u, { botUsername: process.env.BOT_USERNAME }) }).catch((error) => {
       console.error(`[polling] апдейт ${update.update_id} упал: ${error.name}: ${error.message}`);
     });
   }

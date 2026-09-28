@@ -20,7 +20,7 @@ describe("пересказ слушающего", () => {
   it("реплай на подсказку — показать пересказ говорящему с кнопками вердикта", () => {
     const r = checkReducer(base, { type: "message", userId: LISTENER, replyToMessageId: 500, messageId: 9 });
     expect(r.next).toEqual({ state: "awaiting_verdict" });
-    expect(r.effects).toContainEqual({ type: "show_paraphrase", messageId: 9, to: SPEAKER });
+    expect(r.effects).toContainEqual({ type: "show_paraphrase", messageId: 9, text: null, to: SPEAKER });
     expect(keys(r.effects)).toContain("remove_buttons");
   });
 

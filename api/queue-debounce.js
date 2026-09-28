@@ -2,12 +2,18 @@
 // Доставка at-least-once: повтор проверки безопасен — решение читается из
 // базы заново, а ответить может только владелец аренды (R2, R12).
 
-import { handleNodeCallback } from "../lib/queue.js";
-import { respond, runCheck } from "../lib/session.js";
+import { handleNodeCallback, vercelEnv } from "../lib/queue.js";
+import { respond, runCheck, scheduleTail } from "../lib/session.js";
 
 export default handleNodeCallback(
   async (check) => {
-    await runCheck(check, { respond });
+    // Если хвост R11 не встанет в очередь, он ждёт сном внутри этой же доставки.
+    const pending = [];
+    const deps = { enqueue: vercelEnv().enqueue, defer: (p) => pending.push(p) };
+    const respondWithTail = (w, m) => respond(w, m, { scheduleTail: (wi, mi) => scheduleTail(wi, mi, deps) });
+    deps.run = (c) => runCheck(c, { respond: respondWithTail });
+    await deps.run(check);
+    await Promise.allSettled(pending);
   },
   {
     retry: (error, metadata) => {
