@@ -233,3 +233,27 @@ describe("вспомогательное", () => {
     expect(new Date(nextQuotaReset(now)).toISOString()).toBe("2026-09-29T07:00:00.000Z");
   });
 });
+
+describe("объявления о лимите (DR5)", () => {
+  it("переход на 70% — одно тихое объявление в сутки со временем сброса", async () => {
+    const { deps, sent } = harness({ generateResult: { ok: true, usage: 0.72, data: pauseData() } });
+    await respond(1, 0, deps);
+    const notice = sent.find((m) => m.key.startsWith("quota70:"));
+    expect(notice.key).toBe("quota70:7:2026-09-28:0");
+    expect(notice.params.disable_notification).toBe(true);
+    expect(deps.text).toHaveBeenCalledWith("es", "quota.level_70", expect.objectContaining({ reset: expect.any(String) }));
+  });
+
+  it("после дня на 90% — объявление о возврате функций", async () => {
+    const { deps, sent, store } = harness({ generateResult: { ok: true, usage: 0.1, data: pauseData() } });
+    store.outboundStatus.mockImplementation(async (key) => (key === "quota90:7:2026-09-27:0" ? "sent" : null));
+    await respond(1, 0, deps);
+    expect(sent.some((m) => m.key === "quotaok:7:2026-09-28:0")).toBe(true);
+  });
+
+  it("обычный день — без объявлений", async () => {
+    const { deps, sent } = harness({ generateResult: { ok: true, usage: 0.1, data: pauseData() } });
+    await respond(1, 0, deps);
+    expect(sent.some((m) => /^quota/.test(m.key))).toBe(false);
+  });
+});
