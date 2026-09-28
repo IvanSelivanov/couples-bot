@@ -18,6 +18,8 @@ describe("debounce_state", () => {
       firstUnansweredId: null,
       ended: false,
       checkActive: false,
+      pendingTranscripts: 0,
+      latestAt: null,
     });
   });
 

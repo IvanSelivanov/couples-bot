@@ -1,6 +1,6 @@
 // T6: дебаунс «человек договорил» (R1, R11) на fake timers.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DEBOUNCE_MS, MAX_WAIT_MS, decide, onPartnerMessage, runCheck, schedule } from "../../lib/session.js";
+import { DEBOUNCE_MS, MAX_WAIT_MS, decide, onPartnerMessage, onTranscript, runCheck, schedule } from "../../lib/session.js";
 
 describe("decide", () => {
   const state = (answeredUpTo, latestId) => ({ answeredUpTo, latestId, ended: false });
@@ -87,6 +87,8 @@ describe("сквозной дебаунс без очереди", () => {
     responses = [];
     nextId = 1;
     const store = {
+      windowCouple: async () => 1,
+      expireTranscripts: async () => 0,
       debounceState: async () => ({
         answeredUpTo,
         latestId: messages.length ? Math.max(...messages) : null,
@@ -149,5 +151,53 @@ describe("сквозной дебаунс без очереди", () => {
     await vi.advanceTimersByTimeAsync(MAX_WAIT_MS);
     const kinds = run.mock.calls.map(([c]) => `${c.kind}:${c.messageId}`);
     expect(kinds.sort()).toEqual(["debounce:1", "debounce:2", "max_wait:1"]);
+  });
+});
+
+describe("ожидание расшифровки (R22, R26)", () => {
+  it("pending в блоке — ведущий ждёт", () => {
+    expect(decide({ answeredUpTo: 0, latestId: 3, pendingTranscripts: 1 }, { kind: "debounce", messageId: 3 })).toBe(
+      "waiting_transcript",
+    );
+  });
+
+  it("проверка на потолке отвечает, если блок не покрыт", () => {
+    expect(decide({ answeredUpTo: 0, latestId: 5, pendingTranscripts: 0 }, { kind: "transcript_deadline", messageId: 3 })).toBe(
+      "respond",
+    );
+  });
+
+  it("проверка на потолке молчит, если блок уже покрыт", () => {
+    expect(decide({ answeredUpTo: 5, latestId: 5, pendingTranscripts: 0 }, { kind: "transcript_deadline", messageId: 3 })).toBe(
+      "answered",
+    );
+  });
+});
+
+describe("onTranscript", () => {
+  const baseDeps = (result, state) => {
+    const store = {
+      setTranscript: vi.fn().mockResolvedValue(result),
+      debounceState: vi.fn().mockResolvedValue(state),
+      queueBudgetTake: vi.fn().mockResolvedValue(true),
+    };
+    return { store, enqueue: vi.fn().mockResolvedValue({}), defer: vi.fn(), run: vi.fn() };
+  };
+
+  it("вовремя: проверка на последнюю реплику, не раньше паузы", async () => {
+    const deps = baseDeps({ applied: true, late: false }, { latestId: 9, latestAt: 1_000 });
+    deps.now = () => 6_000; // последняя реплика 5 с назад
+    await onTranscript({ windowId: 1, messageId: 4, text: "t" }, deps);
+    expect(deps.enqueue).toHaveBeenCalledWith(
+      { windowId: 1, messageId: 9, kind: "debounce" },
+      expect.objectContaining({ delaySeconds: Math.ceil((DEBOUNCE_MS - 5_000) / 1000) }),
+    );
+  });
+
+  it("поздно: ведущего не будим", async () => {
+    const deps = baseDeps({ applied: false, late: true }, { latestId: 9, latestAt: 0 });
+    expect(await onTranscript({ windowId: 1, messageId: 4, text: "t" }, deps)).toEqual({ applied: false, late: true });
+    expect(deps.enqueue).not.toHaveBeenCalled();
+    expect(deps.defer).not.toHaveBeenCalled();
   });
 });
