@@ -13,7 +13,8 @@
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
-    "spike:guest": "node --env-file=.env spikes/guest-mode.js"
+    "spike:guest": "node --env-file=.env spikes/guest-mode.js",
+    "setup": "node --env-file=.env scripts/setup.js"
   },
   "dependencies": {
     "@vercel/functions": "^3.9.9",
