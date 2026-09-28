@@ -17,6 +17,7 @@ describe("debounce_state", () => {
       latestId: null,
       firstUnansweredId: null,
       ended: false,
+      checkActive: false,
     });
   });
 
