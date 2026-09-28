@@ -33,6 +33,13 @@ describe("граница данных", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("draftReads упоминается только в draft.js", () => {
+    const offenders = [...sources(["lib", "api", "spikes"]), "bot.js"].filter(
+      (f) => ![join("lib", "draft.js"), join("lib", "db.js")].includes(f) && readFileSync(f, "utf8").includes("draftReads"),
+    );
+    expect(offenders).toEqual([]);
+  });
+
   it("никто, кроме context.js, draft.js и db.js, не пишет запросы к messages/notes/summaries/drafts", () => {
     const raw = /["'`](?:messages|notes|summaries|drafts)\?/;
     const offenders = sources(["lib", "api"]).filter((f) => !ALLOWED.has(f) && raw.test(readFileSync(f, "utf8")));
