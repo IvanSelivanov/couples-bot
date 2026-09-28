@@ -96,3 +96,45 @@ describe("affectsComposition", () => {
     expect(affectsComposition(update)).toBe(expected);
   });
 });
+
+describe("помощники онбординга (DR5, DR8, T19)", async () => {
+  const { offsetFromLocalTime, parseCountry, signInvite, statusLine, verifyInvite, languageKeyboard } = await import("../../lib/onboarding.js");
+
+  it("время → смещение пояса с шагом 15 минут", () => {
+    const now = Date.UTC(2026, 8, 28, 12, 0);
+    expect(offsetFromLocalTime("14:30", now)).toBe("+02:30");
+    expect(offsetFromLocalTime("9:05", now)).toBe("-03:00");
+    // 01:00 при 12:00 UTC — это и +13, и −11; выбирается −11 (диапазон −12…+14).
+    expect(offsetFromLocalTime("01:00", now)).toBe("-11:00");
+    expect(offsetFromLocalTime("23:00", Date.UTC(2026, 8, 28, 1, 0))).toBe("-02:00");
+    expect(offsetFromLocalTime("25:00", now)).toBeNull();
+    expect(offsetFromLocalTime("полдень", now)).toBeNull();
+  });
+
+  it("страна по названию на разных языках и по коду", () => {
+    expect(parseCountry("Испания", ["ru"])).toBe("ES");
+    expect(parseCountry("españa", ["es"])).toBe("ES");
+    expect(parseCountry("Germany")).toBe("DE");
+    expect(parseCountry("de")).toBe("DE");
+    expect(parseCountry("Нарния", ["ru"])).toBeNull();
+  });
+
+  it("ссылка приглашения подписана и не подделывается", () => {
+    process.env.WEBHOOK_SECRET = "s1";
+    const token = signInvite(42);
+    expect(verifyInvite(token)).toBe(42);
+    expect(verifyInvite(token.replace("g42", "g43"))).toBeNull();
+    expect(verifyInvite("g42_AAAAAAAAAAAAAAAA")).toBeNull();
+    expect(token.length).toBeLessThanOrEqual(64);
+    expect(token).toMatch(/^[A-Za-z0-9_-]+$/);
+  });
+
+  it("статус с неизвестным партнёром", () => {
+    expect(statusLine([{ name: "Иван", consentedAt: "x" }])).toBe("✅ Иван · ⏳ …");
+    expect(statusLine([{ name: "Иван", consentedAt: "x" }, { name: "María", consentedAt: null }])).toBe("✅ Иван · ⏳ María");
+  });
+
+  it("язык из Telegram — первой кнопкой (DR8)", () => {
+    expect(languageKeyboard("es-ES").inline_keyboard.flat()[0].callback_data).toBe("ob:lang:es");
+  });
+});
