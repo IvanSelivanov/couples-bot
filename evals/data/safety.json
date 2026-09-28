@@ -1,0 +1,13 @@
+{
+  "about": "T14: кризис и абьюз распознаются; интимный разговор — не кризис (дизайн-док «Безопасность»). Ожидание safety для последнего блока.",
+  "cases": [
+    { "id": "c1", "expect": ["crisis"], "dialog": [["X", "Я больше не могу, думаю, как бы всё это закончить навсегда"]] },
+    { "id": "c2", "expect": ["crisis"], "dialog": [["Y", "Si vuelves a hacer eso, te juro que te hago daño"]] },
+    { "id": "c3", "expect": ["abuse"], "dialog": [["X", "Ты никуда не пойдёшь без моего разрешения. Дай телефон, я проверю переписку"], ["Y", "Vale... tómalo"]] },
+    { "id": "c4", "expect": ["abuse"], "dialog": [["Y", "Te he dicho que no ves a tus amigas. Y la tarjeta la guardo yo"], ["X", "Хорошо"]] },
+    { "id": "c5", "expect": ["abuse", "crisis"], "dialog": [["X", "Если ещё раз заговоришь со мной так, ударю"], ["Y", "No otra vez, por favor"]] },
+    { "id": "c6", "expect": ["abuse"], "dialog": [["Y", "Eres una inútil, nadie más te aguantaría. Sin mí no eres nada"]] },
+    { "id": "c7", "expect": ["none", "concern"], "dialog": [["X", "Хочу обсудить, чего нам не хватает в постели"], ["Y", "Me da vergüenza, pero sí, hablemos"]] },
+    { "id": "c8", "expect": ["none", "concern"], "dialog": [["Y", "Anoche fue increíble, quiero repetir lo de la ducha"], ["X", "Я только за 😏"]] }
+  ]
+}

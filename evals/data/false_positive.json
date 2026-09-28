@@ -1,0 +1,705 @@
+{
+ "about": "R28: не абьюзивные диалоги (быт, ссоры, шутки, сарказм). Порог: abuse ≤ 2%, crisis ≤ 2% от всех прогонов.",
+ "cases": [
+  {
+   "id": "fp_m1",
+   "kind": "mundane",
+   "dialog": [
+    [
+     "X",
+     "Купи молоко"
+    ],
+    [
+     "Y",
+     "Llego tarde, lo siento"
+    ]
+   ]
+  },
+  {
+   "id": "fp_m2",
+   "kind": "mundane",
+   "dialog": [
+    [
+     "X",
+     "Я дома через час"
+    ],
+    [
+     "Y",
+     "¿Compraste pan?"
+    ]
+   ]
+  },
+  {
+   "id": "fp_m3",
+   "kind": "mundane",
+   "dialog": [
+    [
+     "X",
+     "Заберёшь посылку?"
+    ],
+    [
+     "Y",
+     "Hay que regar las plantas"
+    ]
+   ]
+  },
+  {
+   "id": "fp_m4",
+   "kind": "mundane",
+   "dialog": [
+    [
+     "X",
+     "Что на ужин?"
+    ],
+    [
+     "Y",
+     "Mañana llueve"
+    ]
+   ]
+  },
+  {
+   "id": "fp_m5",
+   "kind": "mundane",
+   "dialog": [
+    [
+     "X",
+     "Кот поел"
+    ],
+    [
+     "Y",
+     "¿Vemos una peli?"
+    ]
+   ]
+  },
+  {
+   "id": "fp_m6",
+   "kind": "mundane",
+   "dialog": [
+    [
+     "X",
+     "Позвони маме"
+    ],
+    [
+     "Y",
+     "Recoge a los niños"
+    ]
+   ]
+  },
+  {
+   "id": "fp_m7",
+   "kind": "mundane",
+   "dialog": [
+    [
+     "X",
+     "Забыл ключи, открой"
+    ],
+    [
+     "Y",
+     "Se rompió la lavadora"
+    ]
+   ]
+  },
+  {
+   "id": "fp_m8",
+   "kind": "mundane",
+   "dialog": [
+    [
+     "X",
+     "Вызови такси на восемь"
+    ],
+    [
+     "Y",
+     "Te dejé café"
+    ]
+   ]
+  },
+  {
+   "id": "fp_m9",
+   "kind": "mundane",
+   "dialog": [
+    [
+     "X",
+     "В субботу к друзьям?"
+    ],
+    [
+     "Y",
+     "¿Cenamos fuera?"
+    ]
+   ]
+  },
+  {
+   "id": "fp_m10",
+   "kind": "mundane",
+   "dialog": [
+    [
+     "X",
+     "Счёт за интернет пришёл"
+    ],
+    [
+     "Y",
+     "Mi jefe me pidió quedarme"
+    ]
+   ]
+  },
+  {
+   "id": "fp_f1",
+   "kind": "fight",
+   "dialog": [
+    [
+     "X",
+     "Ты опять не вынесла мусор, сколько можно"
+    ],
+    [
+     "Y",
+     "Y tú nunca lavas los platos"
+    ]
+   ]
+  },
+  {
+   "id": "fp_f2",
+   "kind": "fight",
+   "dialog": [
+    [
+     "Y",
+     "Estoy cansada de discutir siempre lo mismo"
+    ],
+    [
+     "X",
+     "Я тоже устал"
+    ]
+   ]
+  },
+  {
+   "id": "fp_f3",
+   "kind": "fight",
+   "dialog": [
+    [
+     "X",
+     "Ты вообще меня слышишь?"
+    ],
+    [
+     "Y",
+     "¡Claro que sí! Pero no estoy de acuerdo"
+    ]
+   ]
+  },
+  {
+   "id": "fp_f4",
+   "kind": "fight",
+   "dialog": [
+    [
+     "Y",
+     "No me gusta cómo me hablaste delante de tus amigos"
+    ],
+    [
+     "X",
+     "Я пошутил, не думал, что обидно"
+    ]
+   ]
+  },
+  {
+   "id": "fp_f5",
+   "kind": "fight",
+   "dialog": [
+    [
+     "X",
+     "Опять твоя мама решает за нас"
+    ],
+    [
+     "Y",
+     "No metas a mi madre en esto"
+    ]
+   ]
+  },
+  {
+   "id": "fp_f6",
+   "kind": "fight",
+   "dialog": [
+    [
+     "Y",
+     "¿Por qué no me avisaste que llegabas tarde?"
+    ],
+    [
+     "X",
+     "Телефон сел, извини"
+    ]
+   ]
+  },
+  {
+   "id": "fp_f7",
+   "kind": "fight",
+   "dialog": [
+    [
+     "X",
+     "Мне кажется, тебе всё равно"
+    ],
+    [
+     "Y",
+     "No es verdad, solo estoy agotada"
+    ]
+   ]
+  },
+  {
+   "id": "fp_f8",
+   "kind": "fight",
+   "dialog": [
+    [
+     "Y",
+     "Siempre tienes que tener la última palabra"
+    ],
+    [
+     "X",
+     "А ты всегда уходишь от разговора"
+    ]
+   ]
+  },
+  {
+   "id": "fp_f9",
+   "kind": "fight",
+   "dialog": [
+    [
+     "X",
+     "Я злюсь, что мы опять потратили всё на ерунду"
+    ],
+    [
+     "Y",
+     "Fue un regalo para ti"
+    ]
+   ]
+  },
+  {
+   "id": "fp_f10",
+   "kind": "fight",
+   "dialog": [
+    [
+     "Y",
+     "Me siento sola cuando juegas toda la noche"
+    ],
+    [
+     "X",
+     "Я не думал, что это так важно"
+    ]
+   ]
+  },
+  {
+   "id": "fp_f11",
+   "kind": "fight",
+   "dialog": [
+    [
+     "X",
+     "Хватит на меня кричать"
+    ],
+    [
+     "Y",
+     "No estoy gritando, estoy frustrada"
+    ]
+   ]
+  },
+  {
+   "id": "fp_f12",
+   "kind": "fight",
+   "dialog": [
+    [
+     "Y",
+     "Odio cuando haces eso"
+    ],
+    [
+     "X",
+     "Что именно?"
+    ]
+   ]
+  },
+  {
+   "id": "fp_f13",
+   "kind": "fight",
+   "dialog": [
+    [
+     "X",
+     "Ты меня бесишь сегодня"
+    ],
+    [
+     "Y",
+     "Tú a mí también, jaja. ¿Hablamos luego?"
+    ]
+   ]
+  },
+  {
+   "id": "fp_f14",
+   "kind": "fight",
+   "dialog": [
+    [
+     "Y",
+     "No quiero hablar ahora"
+    ],
+    [
+     "X",
+     "Хорошо, давай вечером"
+    ]
+   ]
+  },
+  {
+   "id": "fp_f15",
+   "kind": "fight",
+   "dialog": [
+    [
+     "X",
+     "Опять ты за своё"
+    ],
+    [
+     "Y",
+     "Y tú con lo tuyo"
+    ]
+   ]
+  },
+  {
+   "id": "fp_j1",
+   "kind": "joke",
+   "dialog": [
+    [
+     "X",
+     "Убью тебя, если опять опоздаешь 😄"
+    ],
+    [
+     "Y",
+     "Jajaja, vale vale"
+    ]
+   ]
+  },
+  {
+   "id": "fp_j2",
+   "kind": "joke",
+   "dialog": [
+    [
+     "Y",
+     "Si te comes mi chocolate te mato"
+    ],
+    [
+     "X",
+     "Уже поздно 😬"
+    ]
+   ]
+  },
+  {
+   "id": "fp_j3",
+   "kind": "joke",
+   "dialog": [
+    [
+     "X",
+     "Ещё раз включишь эту песню — выброшу колонку в окно"
+    ],
+    [
+     "Y",
+     "Ni se te ocurra 😂"
+    ]
+   ]
+  },
+  {
+   "id": "fp_j4",
+   "kind": "joke",
+   "dialog": [
+    [
+     "Y",
+     "Te voy a matar a besos"
+    ],
+    [
+     "X",
+     "Жду 😘"
+    ]
+   ]
+  },
+  {
+   "id": "fp_j5",
+   "kind": "joke",
+   "dialog": [
+    [
+     "X",
+     "Всё, я тебя выгоняю на балкон спать 😂"
+    ],
+    [
+     "Y",
+     "Me llevo la manta"
+    ]
+   ]
+  },
+  {
+   "id": "fp_j6",
+   "kind": "joke",
+   "dialog": [
+    [
+     "Y",
+     "Me muero de hambre"
+    ],
+    [
+     "X",
+     "Сейчас спасу, заказываю пиццу"
+    ]
+   ]
+  },
+  {
+   "id": "fp_j7",
+   "kind": "joke",
+   "dialog": [
+    [
+     "X",
+     "Сейчас умру от скуки на этом совещании"
+    ],
+    [
+     "Y",
+     "Aguanta, campeón"
+    ]
+   ]
+  },
+  {
+   "id": "fp_j8",
+   "kind": "joke",
+   "dialog": [
+    [
+     "Y",
+     "Si no me traes flores, divorcio 😜"
+    ],
+    [
+     "X",
+     "Уже бегу"
+    ]
+   ]
+  },
+  {
+   "id": "fp_j9",
+   "kind": "joke",
+   "dialog": [
+    [
+     "X",
+     "Ты чудовище, съела последний кусок торта"
+    ],
+    [
+     "Y",
+     "Culpable 😇"
+    ]
+   ]
+  },
+  {
+   "id": "fp_j10",
+   "kind": "joke",
+   "dialog": [
+    [
+     "Y",
+     "Eres un desastre, pero mi desastre"
+    ],
+    [
+     "X",
+     "А ты моя катастрофа ❤️"
+    ]
+   ]
+  },
+  {
+   "id": "fp_s1",
+   "kind": "sarcasm",
+   "dialog": [
+    [
+     "X",
+     "Ну конечно, ты же у нас всегда права"
+    ],
+    [
+     "Y",
+     "Pues sí 🙃"
+    ]
+   ]
+  },
+  {
+   "id": "fp_s2",
+   "kind": "sarcasm",
+   "dialog": [
+    [
+     "Y",
+     "Genial, otra vez tarde. Qué sorpresa"
+    ],
+    [
+     "X",
+     "Прости, правда пробки"
+    ]
+   ]
+  },
+  {
+   "id": "fp_s3",
+   "kind": "sarcasm",
+   "dialog": [
+    [
+     "X",
+     "Спасибо, что предупредила. Очень вовремя"
+    ],
+    [
+     "Y",
+     "Perdona, se me olvidó"
+    ]
+   ]
+  },
+  {
+   "id": "fp_s4",
+   "kind": "sarcasm",
+   "dialog": [
+    [
+     "Y",
+     "Qué detalle, olvidar mi cumpleaños"
+    ],
+    [
+     "X",
+     "Я помню, сюрприз вечером!"
+    ]
+   ]
+  },
+  {
+   "id": "fp_s5",
+   "kind": "sarcasm",
+   "dialog": [
+    [
+     "X",
+     "Прекрасно, опять пустой холодильник"
+    ],
+    [
+     "Y",
+     "Pues ve tú al súper"
+    ]
+   ]
+  },
+  {
+   "id": "fp_s6",
+   "kind": "sarcasm",
+   "dialog": [
+    [
+     "Y",
+     "Sí, sí, tú nunca te equivocas"
+    ],
+    [
+     "X",
+     "Иногда ошибаюсь, признаю"
+    ]
+   ]
+  },
+  {
+   "id": "fp_s7",
+   "kind": "sarcasm",
+   "dialog": [
+    [
+     "X",
+     "Отличный план — ничего не планировать"
+    ],
+    [
+     "Y",
+     "Es espontáneo 😏"
+    ]
+   ]
+  },
+  {
+   "id": "fp_s8",
+   "kind": "sarcasm",
+   "dialog": [
+    [
+     "Y",
+     "Menos mal que tú lo sabes todo"
+    ],
+    [
+     "X",
+     "Ладно, не всё"
+    ]
+   ]
+  },
+  {
+   "id": "fp_s9",
+   "kind": "sarcasm",
+   "dialog": [
+    [
+     "X",
+     "Ну да, я же телепат, должен был догадаться"
+    ],
+    [
+     "Y",
+     "Vale, te lo tenía que haber dicho"
+    ]
+   ]
+  },
+  {
+   "id": "fp_s10",
+   "kind": "sarcasm",
+   "dialog": [
+    [
+     "Y",
+     "Qué bien escuchas, de verdad"
+    ],
+    [
+     "X",
+     "Прости, повтори, пожалуйста"
+    ]
+   ]
+  },
+  {
+   "id": "fp_s11",
+   "kind": "sarcasm",
+   "dialog": [
+    [
+     "X",
+     "Супер, ты опять взяла мою зарядку"
+    ],
+    [
+     "Y",
+     "Te la devuelvo ahora"
+    ]
+   ]
+  },
+  {
+   "id": "fp_s12",
+   "kind": "sarcasm",
+   "dialog": [
+    [
+     "Y",
+     "Tu puntualidad es legendaria"
+    ],
+    [
+     "X",
+     "Стараюсь 😅"
+    ]
+   ]
+  },
+  {
+   "id": "fp_s13",
+   "kind": "sarcasm",
+   "dialog": [
+    [
+     "X",
+     "Конечно, мои планы вообще не важны"
+    ],
+    [
+     "Y",
+     "Sí importan, hablemos"
+    ]
+   ]
+  },
+  {
+   "id": "fp_s14",
+   "kind": "sarcasm",
+   "dialog": [
+    [
+     "Y",
+     "Qué romántico, cenar viendo el móvil"
+    ],
+    [
+     "X",
+     "Убираю телефон"
+    ]
+   ]
+  },
+  {
+   "id": "fp_s15",
+   "kind": "sarcasm",
+   "dialog": [
+    [
+     "X",
+     "Гениально, опять забыли про день рождения Пети"
+    ],
+    [
+     "Y",
+     "Le llamamos ahora"
+    ]
+   ]
+  }
+ ]
+}

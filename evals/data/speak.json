@@ -1,0 +1,25 @@
+{
+  "about": "DR23: ведущий говорит при напряжении, недопонимании или вопросе к боту и молчит на быте. Порог: пропуск напряжения ≤ 10%, лишние ответы на быт ≤ 20%. X пишет по-русски, Y по-испански.",
+  "cases": [
+    { "id": "m1", "expect": "silent", "dialog": [["X", "Купи хлеб по дороге"], ["Y", "Vale, esta noche"]] },
+    { "id": "m2", "expect": "silent", "dialog": [["Y", "¿A qué hora llegas?"], ["X", "Около семи"], ["Y", "Perfecto"]] },
+    { "id": "m3", "expect": "silent", "dialog": [["X", "Забронировал столик на субботу"], ["Y", "¡Genial! ¿Dónde?"], ["X", "В том итальянском"]] },
+    { "id": "m4", "expect": "silent", "dialog": [["Y", "Se acabó el detergente"], ["X", "Закажу сейчас"]] },
+    { "id": "m5", "expect": "silent", "dialog": [["X", "Смотри, какой закат 😍"], ["Y", "Qué bonito"]] },
+    { "id": "m6", "expect": "silent", "dialog": [["Y", "Mi madre viene el domingo"], ["X", "Хорошо, приготовлю плов"], ["Y", "Le va a encantar"]] },
+    { "id": "m7", "expect": "silent", "dialog": [["X", "Задержусь на полчаса, пробки"], ["Y", "Ok, sin prisa"]] },
+    { "id": "m8", "expect": "silent", "dialog": [["Y", "¿Pagaste la luz?"], ["X", "Да, вчера"]] },
+    { "id": "m9", "expect": "silent", "dialog": [["X", "Кот опять уронил кружку"], ["Y", "Jajaja, típico"]] },
+    { "id": "m10", "expect": "silent", "dialog": [["Y", "Te quiero"], ["X", "И я тебя"]] },
+    { "id": "t1", "expect": "speak", "dialog": [["X", "Ты опять опоздала и даже не написала"], ["Y", "Siempre exageras con todo"]] },
+    { "id": "t2", "expect": "speak", "dialog": [["Y", "Nunca me escuchas cuando hablo de mi trabajo"], ["X", "Я слушаю, просто устал"]] },
+    { "id": "t3", "expect": "speak", "dialog": [["X", "Мне обидно, что ты рассказала маме про наши деньги"], ["Y", "No le conté nada importante"]] },
+    { "id": "t4", "expect": "speak", "dialog": [["Y", "Déjalo, da igual"], ["X", "Что значит «да игуаль»? Тебе всё равно?"]] },
+    { "id": "t5", "expect": "speak", "dialog": [["X", "Ну конечно, как всегда я виноват"], ["Y", "Yo no dije eso"]] },
+    { "id": "t6", "expect": "speak", "dialog": [["Y", "Estoy harta de ser la única que limpia"], ["X", "Я тоже убираю, между прочим"]] },
+    { "id": "t7", "expect": "speak", "dialog": [["X", "Можешь объяснить, что ты имела в виду вчера? Я не понял"]] },
+    { "id": "t8", "expect": "speak", "dialog": [["Y", "¿Por qué siempre tienes que tener la razón?"], ["X", "Потому что ты не слушаешь аргументы"]] },
+    { "id": "t9", "expect": "speak", "dialog": [["X", "Ладно. Делай как хочешь."], ["Y", "¿Estás enfadado?"], ["X", "Нет."]] },
+    { "id": "t10", "expect": "speak", "dialog": [["Y", "Me duele que no te acordaras de nuestro aniversario"]] }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "about": "DR25: эмоционально нагруженное голосовое не получает саммари. Приближение: транскрипт подаётся текстом вместо аудио (аудио-набор — после записи голосовых).",
+  "cases": [
+    { "id": "v1", "expect": false, "transcript": "Слушай, купи по дороге хлеб, молоко и корм коту, и не забудь, что в семь придёт мастер по стиральной машине." },
+    { "id": "v2", "expect": false, "transcript": "Oye, mañana tengo médico a las diez, así que lleva tú a los niños al colegio, ¿vale? Y la cena la hago yo." },
+    { "id": "v3", "expect": false, "transcript": "Короче, билеты я посмотрел, есть рейс в пятницу вечером и в субботу утром, в субботу дешевле, реши, какой берём." },
+    { "id": "v4", "expect": true, "transcript": "Я не понимаю, почему ты так со мной разговариваешь при всех. Мне было так стыдно, я еле сдержалась, чтобы не заплакать." },
+    { "id": "v5", "expect": true, "transcript": "Estoy cansada, de verdad. Siento que siempre soy yo la que cede y tú ni te das cuenta. Me duele mucho." },
+    { "id": "v6", "expect": true, "transcript": "Ты опять ничего не сказал. Опять! Я узнаю всё последней, как будто я чужая в этом доме." }
+  ]
+}
