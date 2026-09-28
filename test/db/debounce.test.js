@@ -47,14 +47,28 @@ describe("debounce_state", () => {
   });
 });
 
-describe("runCheck + respond-каркас", () => {
-  it("захватывает аренду и снимает её, маркер не двигает", async () => {
+describe("runCheck + respond на живой базе", () => {
+  it("сбой модели: фолбэк уходит через outbox один раз, маркер сдвигается, аренда снята", async () => {
     const { coupleId, windowId } = await createCouple(sql);
+    await sql`insert into members (user_id, couple_id, lang, display_name) values (1, ${coupleId}, 'ru', 'Иван'), (2, ${coupleId}, 'es', 'María')`;
     const m1 = await addPartnerMessage(sql, coupleId);
-    const decision = await runCheck({ windowId, messageId: Number(m1), kind: "debounce" }, { respond });
+    const sent = [];
+    const deps = {
+      generate: async () => ({ unavailable: "error", reason: "network" }),
+      text: async (lang, key) => `${lang}:${key}`,
+      deliver: async (message) => {
+        sent.push(message.key);
+        return { status: "sent" };
+      },
+    };
+    const decision = await runCheck(
+      { windowId, messageId: Number(m1), kind: "debounce" },
+      { respond: (w, marker) => respond(w, marker, deps) },
+    );
     expect(decision).toBe("respond");
+    expect(sent).toEqual([`pause:${windowId}:${m1}:0`]);
     const [w] = await sql`select answered_up_to, lease_id from windows where id = ${windowId}`;
-    expect(Number(w.answered_up_to)).toBe(0);
+    expect(Number(w.answered_up_to)).toBe(Number(m1));
     expect(w.lease_id).toBeNull();
   });
 });
