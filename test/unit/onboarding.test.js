@@ -139,9 +139,10 @@ describe("помощники онбординга (DR5, DR8, T19)", async () => 
   });
 
   it("кнопка «Другой язык» — последней", () => {
-    const buttons = languageKeyboard("ru", "Другой язык").inline_keyboard.flat();
-    expect(buttons).toHaveLength(9);
-    expect(buttons.at(-1)).toEqual({ text: "Другой язык", callback_data: "ob:lang:other" });
+    const rows = languageKeyboard("ru", "Другой язык").inline_keyboard;
+    expect(rows.flat()).toHaveLength(9);
+    // Отдельной строкой: в строке из трёх подпись обрезается до «Друг…язык».
+    expect(rows.at(-1)).toEqual([{ text: "Другой язык", callback_data: "ob:lang:other" }]);
   });
 
   it("язык по названию: на языке пользователя, по-английски, самоназванием, кодом", () => {

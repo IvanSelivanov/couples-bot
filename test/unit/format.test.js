@@ -53,6 +53,16 @@ describe("keyboard (DR17)", () => {
     ]);
   });
 
+  it("ownRow — кнопка на своей строке, следующая начинает новую", () => {
+    const kb = keyboard([
+      { labels: ["A"], data: "a" },
+      { labels: ["B"], data: "b", ownRow: true },
+      { labels: ["C"], data: "c" },
+    ]);
+    expect(kb.inline_keyboard.map((row) => row.map((b) => b.text))).toEqual([["A"], ["B"], ["C"]]);
+    expect(kb.inline_keyboard[1][0]).not.toHaveProperty("ownRow");
+  });
+
   it("строка не шире 30 символов подписей", () => {
     const kb = keyboard([
       { labels: ["Двенадцать12"], data: "a" },
