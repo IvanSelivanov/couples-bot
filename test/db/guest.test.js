@@ -96,6 +96,44 @@ describe("Guest Mode", () => {
     expect(h.env.onSafety).toHaveBeenCalledWith(expect.objectContaining({ surface: "guest", signal: "crisis" }));
   });
 
+  it("реплай на голосовое: аудио в тот же вызов модели, в историю пишется только вызов", async () => {
+    const h = env();
+    h.env.fetchMedia = vi.fn().mockResolvedValue(Buffer.from("ogg"));
+    const voice = { message_id: 9, from: { id: Y }, voice: { file_id: "v1", duration: 12, mime_type: "audio/ogg" } };
+    expect(await handleUpdate(guest(X, { id: Y, type: "private" }, { reply_to_message: voice }), h.env)).toBe("guest_confirmed");
+    expect(h.env.fetchMedia).toHaveBeenCalledWith("v1");
+    const call = h.env.generate.mock.calls[0][0];
+    expect(call.parts[0].text).toContain("voice message, attached below");
+    expect(call.parts[1].inline_data).toEqual({ mime_type: "audio/ogg", data: Buffer.from("ogg").toString("base64") });
+    expect((await sql`select text from messages where scope = 'guest'`).map((r) => r.text)).toEqual(["@bot что она имела в виду?"]);
+  });
+
+  it("реплай на кружок: видео в низком разрешении", async () => {
+    const h = env();
+    h.env.fetchMedia = vi.fn().mockResolvedValue(Buffer.from("mp4"));
+    const note = { message_id: 9, from: { id: Y }, video_note: { file_id: "n1", duration: 20 } };
+    await handleUpdate(guest(X, { id: Y, type: "private" }, { reply_to_message: note }), h.env);
+    const call = h.env.generate.mock.calls[0][0];
+    expect(call.parts[1].inline_data.mime_type).toBe("video/mp4");
+    expect(call.mediaResolution).toBe("MEDIA_RESOLUTION_LOW");
+  });
+
+  it("голосовое длиннее потолка или не скачалось — честная строка без модели", async () => {
+    const long = env();
+    long.env.fetchMedia = vi.fn();
+    const tooLong = { message_id: 9, from: { id: Y }, voice: { file_id: "v2", duration: 601 } };
+    expect(await handleUpdate(guest(X, { id: Y, type: "private" }, { reply_to_message: tooLong }), long.env)).toBe("guest_media_unavailable");
+    expect(long.env.fetchMedia).not.toHaveBeenCalled();
+    expect(long.env.generate).not.toHaveBeenCalled();
+    expect(long.sent[0].params.result.input_message_content.message_text).toContain("ru:guest.voice_unavailable");
+
+    const broken = env();
+    broken.env.fetchMedia = vi.fn().mockRejectedValue(new Error("HTTP 400"));
+    const voice = { message_id: 9, from: { id: Y }, voice: { file_id: "v3", duration: 5 } };
+    expect(await handleUpdate(guest(X, { id: Y, type: "private" }, { reply_to_message: voice }), broken.env)).toBe("guest_media_unavailable");
+    expect(broken.env.generate).not.toHaveBeenCalled();
+  });
+
   it("пара не active — «не могу ответить» без модели", async () => {
     await sql`update couples set state = 'revoked'`;
     const h = env();

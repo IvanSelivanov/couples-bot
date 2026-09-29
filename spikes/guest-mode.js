@@ -7,13 +7,14 @@
 //   4. Работает ли HTML с <blockquote expandable> в ответе answerGuestQuery?
 //   5. Сколько можно тянуть с ответом (SPIKE_DELAY_MS)?
 //   6. Можно ли потом отредактировать ответ по inline_message_id?
+//   7. Скачивается ли голосовое или кружок из reply_to_message?
 //
 //   npm run spike:guest            (нужен BOT_TOKEN в .env)
 //   SPIKE_DELAY_MS=60000 npm run spike:guest   — проверить долгий ответ
 //
 // Код одноразовый: в бота он не импортируется.
 
-import { call, TelegramError } from "../lib/telegram.js";
+import { call, download, getFile, TelegramError } from "../lib/telegram.js";
 
 const delayMs = Number(process.env.SPIKE_DELAY_MS ?? 0);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -70,6 +71,18 @@ async function handleGuest(message) {
     guest_query_id: message.guest_query_id,
     keys: Object.keys(message),
   });
+
+  // 7. Можно ли скачать голосовое или кружок из реплая, если бота нет в чате?
+  const media = reply?.voice ?? reply?.video_note;
+  if (media) {
+    try {
+      const file = await getFile(media.file_id);
+      const bytes = await download(file.file_path);
+      console.log(`Медиа из реплая: duration=${media.duration} с, скачано ${bytes.length} байт`);
+    } catch (error) {
+      console.log("Медиа из реплая: ОШИБКА —", error.message);
+    }
+  }
 
   if (delayMs) {
     console.log(`Жду ${delayMs} мс перед ответом…`);
