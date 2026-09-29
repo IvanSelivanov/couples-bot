@@ -1,6 +1,11 @@
 {
   "name": "couples-bot",
   "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IvanSelivanov/couples-bot"
+  },
   "type": "module",
   "engines": {
     "node": ">=22"

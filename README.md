@@ -1,88 +1,180 @@
 # couples-bot
 
-Личный Telegram-бот для пары: ведущий разговора в общей группе, переводчик
-между языками партнёров и помощник в личке у каждого. Некоммерческий проект.
+A Telegram bot for one couple: a calm conversation helper in the couple's
+shared group, a translator between the partners' languages, and a private
+assistant for each partner. It is a non-commercial side project. Everyone
+deploys their own copy: one deployment serves one couple, and the person who
+deploys it controls the data.
 
-Архитектура как у tgbot (Node на Vercel, Gemini, Bot API через fetch) плюс
-Supabase для памяти и Vercel Queues для приёма и дебаунса. Дизайн и все
-решения ревью: `~/.gstack/projects/tgbot/ivanselivanov-main-design-20260927-140842.md`.
+It is not a therapist and does not pretend to be one.
 
-## Требования
+## What it does
 
-- Node 22+
-- Docker Desktop (локальный Supabase)
-- Два Google AI Studio ключа: для бота и отдельный для евалов
+**In the couple's group**
+- Translates messages between the partners' languages (meaning and tone, not
+  word by word). `/translate` switches it on and off.
+- Waits for a pause in the conversation and speaks only when there is tension,
+  a misunderstanding or a question addressed to it. Never takes sides. Answers
+  are short, with one question at most.
+- Transcribes voice messages and video notes and translates them for the
+  partner.
+- Offers an understanding check: each partner restates what they heard.
+- When a conversation window closes, it posts a short recap: what got
+  clarified and what is still open.
+- `/pause` silences the bot.
 
-## Локально
+**In a private chat with each partner**
+- A private helper that knows the shared context.
+- `/draft` helps phrase a message to your partner before you send it.
+- `/notes`: things you want the bot to keep in mind. A note is only used in
+  the shared conversation if you allow it, and it is never quoted verbatim.
+- Data controls in `/menu`: delete your chat, delete the shared history,
+  withdraw consent.
+
+**In the couple's own 1:1 chat (Telegram Guest Mode)**
+- Reply to a partner's message (text, voice or video note) with
+  `@your_bot what did they mean?` and the bot explains it in both languages,
+  with hypotheses rather than verdicts. In any other chat it only rephrases,
+  in your language, and stores nothing.
+
+**Safety**
+- If a message looks like a crisis (a threat to hurt someone, self-harm), the
+  bot does not ask the model anything. It sends a static message with help
+  lines for each partner's country. The numbers are fetched in advance and
+  verified against their source pages.
+- Signs of control or intimidation change how the bot talks: no "both sides"
+  balancing and no joint exercises.
+
+## Privacy: read this before deploying
+
+- Private chats with the bot are encrypted in the database (AES-256-GCM), but
+  whoever holds `DM_ENCRYPTION_KEY` can technically read them. The bot names
+  that person (`ADMIN_NAME`) in the consent text each partner sees before using it.
+- Messages are sent to Google Gemini. On the **free tier, Google may use the
+  data to improve its products**; check the current
+  [Gemini API terms](https://ai.google.dev/gemini-api/terms). Use a paid key if
+  that is not acceptable to you.
+- A daily cron job summarises old messages and deletes the originals.
+
+## Stack
+
+- Node.js 22+ functions on Vercel. Telegram updates go through Vercel Queues:
+  one topic receives updates, another handles the debounce before the bot
+  speaks.
+- Supabase (Postgres + PostgREST) for memory. Atomic operations live in SQL
+  functions, and row-level security is on with no policies, so only the
+  service key has access.
+- Google Gemini (`gemini-3.1-flash-lite` by default). The bot tracks its own
+  daily quota and degrades in steps as it runs out: summaries first, then
+  group replies. Private chats keep working to the end.
+- Telegram Bot API over plain `fetch`.
+
+## Set up your own
+
+### 1. Telegram
+
+1. Create a bot with [@BotFather](https://t.me/BotFather) and save the token.
+2. In BotFather, open the bot's settings and turn on **Guest Mode**.
+3. Create a group for the two of you. You will add the bot to it at the end.
+
+### 2. Keys and config
 
 ```sh
+git clone https://github.com/IvanSelivanov/couples-bot && cd couples-bot
 npm install
-cp .env.example .env        # заполнить (см. комментарии в файле)
-npm run db:start            # Postgres + PostgREST в Docker
-npm run bot                 # long polling, без очереди: дебаунс ждёт сном
+cp .env.example .env
 ```
 
-## Тесты и евалы
+Fill in `.env` using the comments in the file. To generate the secrets:
 
 ```sh
-npm test                    # unit, без сети и базы
-npm run test:db             # на локальном Supabase, миграции с нуля
-npm run eval                # промпты на живой модели, нужен EVAL_GEMINI_API_KEY
+openssl rand -hex 32                                   # WEBHOOK_SECRET, CRON_SECRET
+node -e "import('./lib/crypto.js').then(m => console.log(m.generateKey()))"   # DM_ENCRYPTION_KEY
 ```
 
-`npm run eval` — гейт запуска: код выхода 1, если провален любой порог
-(в том числе ложные срабатывания абьюза ≤ 2%). Выбрать наборы:
-`EVAL_SETS=speak,false_positive npm run eval`.
+Get a Gemini API key from [Google AI Studio](https://aistudio.google.com/).
+Set `ADMIN_NAME` to your own name, as it should appear in the consent text.
 
-## Спайк Guest Mode (до запуска)
+### 3. Run locally (optional)
 
-Проверяет, как Guest Mode работает в личной переписке двоих. От результата
-зависит правило «чат подтверждён как личка пары» (`isCoupleChat` в
-`lib/handle.js`).
+Requires Docker.
 
-1. BotFather → MiniApp → настройки бота → включить **Guest Mode**.
-2. `npm run spike:guest`
-3. В личной переписке с партнёром ответить на его сообщение: `@имя_бота что он имел в виду?`.
-   Повторить с голосовым вместо текста.
-4. `SPIKE_DELAY_MS=60000 npm run spike:guest` — долгий ответ.
+```sh
+npm run db:start      # local Supabase; prints API_URL and service_role key for .env
+npm run bot           # long polling, no queues
+```
 
-Сохранить вывод: `chat_type`, `chat_id`, есть ли `reply_to_message`, работает
-ли HTML и редактирование.
+### 4. Deploy
 
-Результат 2026-09-29: в личке `chat.type = private`, `chat.id` = id
-собеседника; `reply_to_message` приходит целиком, голосовое и кружок из него
-скачиваются; `language_code` нет; HTML, `expandable` и правка по
-`inline_message_id` работают; ответ через 60 с принимается.
+```sh
+vercel login
+npx supabase login
+```
 
-## Деплой
-
-1. **Логины:** `vercel login`, `npx supabase login`.
-2. **Supabase.** Проект в регионе **eu-central-1 (Frankfurt)**, рядом с функциями
-   Vercel `fra1` (T13):
+1. **Supabase.** Create a project. `vercel.json` pins functions to `fra1`
+   (Frankfurt), so the closest Supabase region is `eu-central-1`. If you change
+   the region, change both.
    ```sh
-   npx supabase projects create couples-bot --region eu-central-1 --org-id <org> --db-password <пароль>
+   npx supabase projects create couples-bot --region eu-central-1 --org-id <org> --db-password <password>
    npx supabase link --project-ref <ref>
    npx supabase db push
-   npx supabase projects api-keys --project-ref <ref>   # ключ service_role
+   npx supabase projects api-keys --project-ref <ref>   # take the service_role key
    ```
-   В `.env.production` (в git не попадает):
-   `SUPABASE_URL=https://<ref>.supabase.co` и `SUPABASE_SERVICE_KEY=<service_role>`.
-3. **Vercel.** `vercel link` (новый проект). Регион функций задан в
-   `vercel.json` (`fra1`), очереди — триггерами там же; OIDC для
-   `@vercel/queue` включён по умолчанию.
-4. **Переменные:** `npm run push-env` — секреты из `.env`, Supabase из
-   `.env.production`, только в production, значения идут через stdin.
-   `DM_ENCRYPTION_KEY` сохранить ещё где-нибудь вне Vercel: потерянный ключ =
-   потерянные лички.
-5. **Деплой:** `vercel deploy --prod`.
-6. **Вебхук и команды:** `npm run setup https://<проект>.vercel.app`.
-   Локальный `npm run bot` и спайк после этого не запускать: `getUpdates`
-   снимает вебхук.
-7. Добавить бота в группу пары, дать права администратора (только «Закреплять
-   сообщения»), написать в группе `/start`.
+   Put the production values into `.env.production` (git-ignored):
+   `SUPABASE_URL=https://<ref>.supabase.co` and `SUPABASE_SERVICE_KEY=<service_role>`.
+2. **Vercel.** Run `vercel link` and create a new project. Queue triggers and
+   the cron job are already defined in `vercel.json`.
+3. **Environment variables:** `npm run push-env`. This copies the secrets from
+   `.env` and the Supabase values from `.env.production` to Vercel production.
+   Values are passed through stdin and never printed. Also keep a copy of
+   `DM_ENCRYPTION_KEY` outside Vercel: if you lose the key, you lose the
+   private chats.
+4. **Deploy:** `vercel deploy --prod`.
+5. **Webhook and commands:** `npm run setup https://<project>.vercel.app`.
+   After this, do not run `npm run bot` against the same bot token, because
+   polling removes the webhook.
+6. Add the bot to your group as an admin, with only the **Pin messages** right,
+   and send `/start` in the group. The bot walks you both through
+   onboarding: language, country for help lines, time zone and consent.
 
-## Ротация ключа шифрования
+### Rotating the encryption key
 
-Старый ключ → `DM_ENCRYPTION_KEY_PREV`, новый → `DM_ENCRYPTION_KEY`,
-`DM_ENCRYPTION_KEY_VERSION` + 1. Ежедневный cron перешифрует старые записи;
-когда `rewritten` в отчёте cron станет 0, `DM_ENCRYPTION_KEY_PREV` можно убрать.
+Move the old key to `DM_ENCRYPTION_KEY_PREV`, put the new key in
+`DM_ENCRYPTION_KEY`, and increase `DM_ENCRYPTION_KEY_VERSION` by 1. The daily
+cron re-encrypts old records. When its report shows `rewritten: 0`, remove
+`DM_ENCRYPTION_KEY_PREV`.
+
+## Tests and evals
+
+```sh
+npm test              # unit tests, no network or database
+npm run test:db       # against local Supabase, migrations from scratch
+npm run eval          # prompts against the live model, needs EVAL_GEMINI_API_KEY
+```
+
+The evals gate prompt changes. `npm run eval` exits with 1 if any threshold
+fails. The thresholds cover these areas:
+- when the bot speaks and when it stays silent;
+- voice rules;
+- crisis and abuse detection, where false positives must stay at 2% or below;
+- sycophancy;
+- leaking private notes;
+- tone of voice-message summaries.
+
+To choose which sets to run, use `EVAL_SETS=speak,false_positive`. For the
+number of runs per case, use `EVAL_RUNS=1`. To print failing replies, use
+`EVAL_VERBOSE=1`. A full run makes about 250 model calls.
+
+`npm run spike:guest` is a manual probe of Telegram Guest Mode that checks
+which ids arrive, whether media in the replied message can be downloaded, and
+whether HTML and edits work.
+
+## Notes for readers of the code
+
+Code comments are in Russian. Tags like `DR12`, `R20` or `T13` refer to
+decisions in the original design document, which is not published. The
+comments next to each tag explain the decision itself.
+
+## License
+
+[MIT](LICENSE)

@@ -15,7 +15,7 @@ function guestMessage({ chatId, chatType = "private", from = X, replyFrom = Y })
     chat: { id: chatId, type: chatType },
     reply_to_message: { message_id: 9, from: { id: replyFrom }, text: "Ты уже дома?" },
     guest_query_id: "q1",
-    text: "@couple_psych_bot что она имела в виду?",
+    text: "@couple_psych_bot что он имел в виду?",
   };
 }
 
