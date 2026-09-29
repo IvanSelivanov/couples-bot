@@ -49,6 +49,11 @@ npm run eval                # промпты на живой модели, ну�
 Сохранить вывод: `chat_type`, `chat_id`, есть ли `reply_to_message`, работает
 ли HTML и редактирование.
 
+Результат 2026-09-29: в личке `chat.type = private`, `chat.id` = id
+собеседника; `reply_to_message` приходит целиком, голосовое и кружок из него
+скачиваются; `language_code` нет; HTML, `expandable` и правка по
+`inline_message_id` работают; ответ через 60 с принимается.
+
 ## Деплой
 
 1. **Supabase.** Создать проект в регионе **eu-central-1 (Frankfurt)** — рядом с
