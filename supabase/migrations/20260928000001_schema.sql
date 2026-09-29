@@ -1,24 +1,24 @@
--- Схема бота. Источник: дизайн-док, раздел «Данные», и решения ревью
+-- Bot schema. Source: the design doc, section "Data", and review decisions
 -- (R3, R10, R12, R13, R18, R19, R21, R22, R25, R26, R27, DR19, DR22).
 --
--- Доступ: только service key с сервера. RLS включён на всех таблицах и
--- политик нет, поэтому anon/publishable ключ не видит ничего, даже если утечёт.
+-- Access: service key from the server only. RLS is enabled on every table with
+-- no policies, so the anon/publishable key sees nothing, even if it leaks.
 --
--- Текст лички (scope = 'dm', черновики, неодобренные заметки, сводки dm:*,
--- payload апдейтов из фолбэка) хранится шифротекстом из lib/crypto.js:
--- база его не читает и не разбирает.
+-- Private chat text (scope = 'dm', drafts, unapproved notes, dm:* summaries,
+-- update payloads from the fallback) is stored as ciphertext from lib/crypto.js:
+-- the database neither reads nor parses it.
 
 create table couples (
   id                 bigint generated always as identity primary key,
   group_chat_id      bigint unique,
-  -- Машина состояний пары (R6, R25): onboarding → active ⇄ paused,
+  -- Couple state machine (R6, R25): onboarding → active ⇄ paused,
   -- active/paused → revoked → paused|active, active → suspended → active.
   state              text not null default 'onboarding'
                      check (state in ('onboarding', 'active', 'paused', 'revoked', 'suspended')),
-  -- Растёт на каждом переходе; can_publish сравнивает с ним (R12).
+  -- Grows on every transition; can_publish compares against it (R12).
   state_version      integer not null default 0,
   auto_translate     boolean not null default true,
-  -- Паузу снимает только поставивший (DR19); переживает /revoke (R25).
+  -- Only the person who paused can resume (DR19); survives /revoke (R25).
   paused_by          bigint,
   paused_at          timestamptz,
   pause_after_signal boolean not null default false,
@@ -38,20 +38,20 @@ create table members (
 );
 create index members_couple_idx on members (couple_id);
 
--- Окна разговора в группе (DR9; бывшие «сессии»). Одно открытое окно на пару
--- гарантирует частичный уникальный индекс (R21).
+-- Conversation windows in the group (DR9; formerly "sessions"). One open window per
+-- couple is guaranteed by a partial unique index (R21).
 create table windows (
   id                 bigint generated always as identity primary key,
   couple_id          bigint not null references couples (id) on delete cascade,
   started_at         timestamptz not null default now(),
   last_message_at    timestamptz not null default now(),
   ended_at           timestamptz,
-  -- id последнего сообщения, на которое ведущий уже отреагировал.
+  -- id of the last message the helper has already responded to.
   answered_up_to     bigint not null default 0,
-  -- Аренда права ответить (R2, R12).
+  -- Lease on the right to reply (R2, R12).
   lease_id           uuid,
   generating_until   timestamptz,
-  -- Когда в окне впервые опубликован ответ ведущего (DR23, R30).
+  -- When the helper's reply was first published in the window (DR23, R30).
   first_reply_at     timestamptz
 );
 create unique index windows_one_open_per_couple on windows (couple_id) where ended_at is null;
@@ -60,30 +60,30 @@ create table messages (
   id                bigint generated always as identity primary key,
   couple_id         bigint not null references couples (id) on delete cascade,
   scope             text not null check (scope in ('group', 'guest', 'dm')),
-  owner_user_id     bigint,           -- владелец лички для scope = 'dm'
-  author_user_id    bigint,           -- null у сообщений бота
+  owner_user_id     bigint,           -- private chat owner for scope = 'dm'
+  author_user_id    bigint,           -- null for bot messages
   is_bot            boolean not null default false,
   kind              text not null default 'text' check (kind in ('text', 'voice', 'video_note')),
   tg_chat_id        bigint,
   tg_message_id     bigint,
-  text              text,             -- для dm — шифротекст
+  text              text,             -- ciphertext for dm
   lang              text,
-  -- Расшифровка голосовых (R22, R26): pending → done | failed, один раз.
+  -- Voice transcription (R22, R26): pending → done | failed, exactly once.
   transcript_status text check (transcript_status in ('pending', 'done', 'failed')),
   transcript_late   boolean not null default false,
   created_at        timestamptz not null default now(),
   check (scope <> 'dm' or owner_user_id is not null),
   check (is_bot or author_user_id is not null)
 );
--- Повтор того же апдейта не создаёт вторую строку (R3).
+-- A repeat of the same update doesn't create a second row (R3).
 create unique index messages_tg_unique on messages (couple_id, scope, tg_chat_id, tg_message_id);
 create index messages_couple_scope_idx on messages (couple_id, scope, id);
 create index messages_dm_owner_idx on messages (owner_user_id, created_at) where scope = 'dm';
 
 create table summaries (
   couple_id     bigint not null references couples (id) on delete cascade,
-  scope_key     text not null,        -- 'group' или 'dm:<user_id>'
-  text          text not null,        -- для dm:* — шифротекст
+  scope_key     text not null,        -- 'group' or 'dm:<user_id>'
+  text          text not null,        -- ciphertext for dm:*
   covers_up_to  bigint not null default 0,
   updated_at    timestamptz not null default now(),
   primary key (couple_id, scope_key)
@@ -93,7 +93,7 @@ create table notes (
   id              bigint generated always as identity primary key,
   couple_id       bigint not null references couples (id) on delete cascade,
   author_user_id  bigint not null,
-  text            text,               -- обнуляется при отзыве (R15)
+  text            text,               -- nulled on revocation (R15)
   approved_at     timestamptz,
   revoked_at      timestamptz,
   created_at      timestamptz not null default now()
@@ -105,8 +105,8 @@ create table drafts (
   user_id       bigint not null,
   original      text,
   reformulated  text,
-  translations  text,                 -- шифротекст JSON
-  -- sending ставится условным UPDATE до отправки (R13).
+  translations  text,                 -- ciphertext of JSON
+  -- sending is set by a conditional UPDATE before sending (R13).
   status        text not null default 'editing'
                 check (status in ('editing', 'sending', 'unknown')),
   created_at    timestamptz not null default now()
@@ -115,9 +115,9 @@ create table drafts (
 create table abuse_flags (
   id          bigint generated always as identity primary key,
   couple_id   bigint not null references couples (id) on delete cascade,
-  source      text not null,          -- 'group' или 'dm:<user_id>'
+  source      text not null,          -- 'group' or 'dm:<user_id>'
   set_at      timestamptz not null default now(),
-  cleared_at  timestamptz             -- для 'group' в v1 никогда (DR20)
+  cleared_at  timestamptz             -- never for 'group' in v1 (DR20)
 );
 create index abuse_flags_active_idx on abuse_flags (couple_id) where cleared_at is null;
 
@@ -134,8 +134,8 @@ create table checks (
   ended_at          timestamptz
 );
 
--- Дедупликация и долговечный приём (R3, R10, R19). payload заполняется
--- только в фолбэке без очереди, зашифрован и стирается при done (R27).
+-- Deduplication and durable intake (R3, R10, R19). payload is filled only in
+-- the fallback without the queue, encrypted, and wiped on done (R27).
 create table processed_updates (
   update_id    bigint primary key,
   status       text not null default 'received' check (status in ('received', 'done')),
@@ -143,7 +143,7 @@ create table processed_updates (
   received_at  timestamptz not null default now()
 );
 
--- Исходящие сообщения (R13, R29). Строки лички удаляются после доставки (R27).
+-- Outgoing messages (R13, R29). Private chat rows are deleted after delivery (R27).
 create table outbound (
   id              bigint generated always as identity primary key,
   couple_id       bigint references couples (id) on delete cascade,
@@ -153,25 +153,25 @@ create table outbound (
   lease_id        uuid,
   part            integer not null default 0,
   status          text not null default 'pending' check (status in ('pending', 'sent', 'unknown')),
-  payload         text not null,      -- для dm — шифротекст
+  payload         text not null,      -- ciphertext for dm
   tg_message_id   bigint,
   created_at      timestamptz not null default now(),
   sent_at         timestamptz
 );
 
--- Дневной счётчик запросов к Gemini (уровни квоты R20, R31).
+-- Daily Gemini request counter (quota tiers R20, R31).
 create table quota (
   day       date primary key,
   requests  integer not null default 0
 );
 
--- Месячный счётчик операций Vercel Queues (фолбэк R1).
+-- Monthly Vercel Queues operations counter (R1 fallback).
 create table queue_ops (
   month  date primary key,
   ops    integer not null default 0
 );
 
--- Кеш машинного перевода фиксированных текстов (DR15, R23, TD1).
+-- Machine translation cache for fixed texts (DR15, R23, TD1).
 create table copy_cache (
   lang         text not null,
   key          text not null,

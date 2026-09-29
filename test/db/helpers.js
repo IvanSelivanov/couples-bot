@@ -1,9 +1,9 @@
-// Прямой SQL к локальной базе — только для подготовки и проверки состояния
-// в тестах. Сам бот ходит в базу через PostgREST (lib/db.js).
+// Direct SQL to the local database, only for preparing and checking state in
+// tests. The bot itself talks to the database through PostgREST (lib/db.js).
 import postgres from "postgres";
 import { inject } from "vitest";
 
-// lib/db.js читает конфиг из окружения, как в проде.
+// lib/db.js reads its config from the environment, as in production.
 export function useLocalSupabase() {
   process.env.SUPABASE_URL = inject("apiUrl");
   process.env.SUPABASE_SERVICE_KEY = inject("serviceKey");
@@ -31,7 +31,7 @@ export function connect() {
   return postgres(inject("dbUrl"), { max: 4, onnotice: () => {} });
 }
 
-// Очищает все таблицы схемы public, кроме переданных в keep.
+// Truncates every table in the public schema except those passed in keep.
 export async function truncateAll(sql, keep = []) {
   const rows = await sql`
     select tablename from pg_tables where schemaname = 'public'

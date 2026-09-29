@@ -1,4 +1,4 @@
-// T30 на живой базе: гейт расшифровки в аренде, CAS статуса и late (R22, R26).
+// T30 on a live database: the transcription gate in the lease, status CAS and late (R22, R26).
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { claimReplyWindow, debounceState, expireTranscripts, ingestGroupMessage, setTranscript } from "../../lib/db.js";
 import { connect, truncateAll, useLocalSupabase } from "./helpers.js";

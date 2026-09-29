@@ -1,4 +1,4 @@
-// T3: аренда окна ответа на настоящем Postgres (R2, R11, R12).
+// T3: the reply window lease on real Postgres (R2, R11, R12).
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { canPublish, claimReplyWindow, finishReply } from "../../lib/db.js";
 import { addPartnerMessage, connect, createCouple, truncateAll, useLocalSupabase } from "./helpers.js";
@@ -64,10 +64,10 @@ describe("finish_reply", () => {
     expect(Number(w.answered_up_to)).toBe(0);
   });
 
-  // Контрпример из outside voice №2: сообщения в t=20 и t=25, генерация
-  // начинается после t=45 (пауза от t=25), а в t=50 приходит новое.
-  // Задача t=50 не может захватить окно (аренда занята), поэтому хвост
-  // должен вернуть finish_reply, иначе t=50 останется без ответа.
+  // Counterexample from outside voice #2: messages at t=20 and t=25, generation
+  // starts after t=45 (pause from t=25), and a new message arrives at t=50.
+  // The t=50 task can't take the window (the lease is held), so finish_reply
+  // must return the tail, otherwise t=50 is left without a reply.
   it("возвращает сообщение, пришедшее во время генерации (хвост R11)", async () => {
     const { coupleId, windowId } = await createCouple(sql);
     await addPartnerMessage(sql, coupleId, { author: 1 });

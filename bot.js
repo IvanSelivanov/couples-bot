@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// Локальный режим: long polling вместо вебхука и без очереди.
+// Local mode: long polling instead of the webhook, no queue.
 //
 //   npm run db:start && npm run bot
 //
-// Обработка та же, что в проде (processUpdate → handleUpdate), включая
-// дедупликацию через processed_updates, поэтому нужна локальная база.
-// processUpdate зовётся без await: долгая обработка одного апдейта не держит
-// polling, а ошибки только логируются.
+// Processing is the same as in production (processUpdate → handleUpdate),
+// including deduplication via processed_updates, so a local database is needed.
+// processUpdate is called without await: slow processing of one update doesn't
+// block polling, and errors are only logged.
 
 import { call, TelegramError } from "./lib/telegram.js";
 import { processUpdate } from "./lib/ingest.js";
@@ -19,14 +19,14 @@ process.on("SIGINT", () => {
   process.exit(0);
 });
 
-// Вебхук и getUpdates несовместимы: Telegram отвечает 409, пока стоит вебхук.
+// Webhook and getUpdates don't mix: Telegram answers 409 while a webhook is set.
 await call("deleteWebhook", { drop_pending_updates: false });
 console.log("Слушаю. Ctrl-C чтобы остановить.");
 
 for (;;) {
   let updates;
   try {
-    // allowed_updates тот же, что при setWebhook (дизайн-док, «Модули»).
+    // Same allowed_updates as in setWebhook (design doc, "Modules").
     updates = await call("getUpdates", { timeout: 30, offset, allowed_updates: ALLOWED_UPDATES }, { timeoutMs: 40_000 });
   } catch (error) {
     if (error instanceof TelegramError || error.name === "TimeoutError") {

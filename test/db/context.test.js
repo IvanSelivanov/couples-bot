@@ -1,4 +1,4 @@
-// T9: граница данных контекста на живой базе (R15, «Граница в коде»).
+// T9: the context data boundary on a live database (R15, "Boundary in code").
 import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { ContextRefused, buildDmContext, buildGroupContext } from "../../lib/context.js";
@@ -17,7 +17,7 @@ const X = 101;
 const Y = 202;
 let coupleId;
 
-// Полный набор данных пары, где у каждого куска свой маркер в тексте.
+// A full set of couple data where every piece has its own marker in the text.
 beforeEach(async () => {
   await truncateAll(sql);
   const [c] = await sql`insert into couples (group_chat_id, state) values (-1, 'active') returning id`;

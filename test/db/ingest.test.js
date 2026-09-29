@@ -1,4 +1,4 @@
-// T5 на живой базе: processed_updates и бюджет Queues (R1, R3, R10, R27).
+// T5 on a live database: processed_updates and the Queues budget (R1, R3, R10, R27).
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { markDone, markReceived, queueBudgetTake } from "../../lib/db.js";
 import { connect, truncateAll, useLocalSupabase } from "./helpers.js";
@@ -41,7 +41,7 @@ describe("markReceived / markDone", () => {
 
 describe("queue_budget_take (R1)", () => {
   it("пускает до 90% месячного бюджета", async () => {
-    // лимит 30 операций, по 3 на сообщение, порог 90% → 27 операций = 9 сообщений
+    // limit 30 operations, 3 per message, 90% threshold → 27 operations = 9 messages
     const results = [];
     for (let i = 0; i < 12; i++) results.push(await queueBudgetTake(3, 30, 90));
     expect(results.filter(Boolean)).toHaveLength(9);

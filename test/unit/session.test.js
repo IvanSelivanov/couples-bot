@@ -1,4 +1,4 @@
-// T6: дебаунс «человек договорил» (R1, R11) на fake timers.
+// T6: the "person has finished talking" debounce (R1, R11) on fake timers.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DEBOUNCE_MS, MAX_WAIT_MS, decide, onPartnerMessage, onTranscript, runCheck, schedule } from "../../lib/session.js";
 
@@ -71,8 +71,8 @@ describe("schedule: где ждать (R1)", () => {
   });
 });
 
-// Сквозной сценарий на сне в фоне и fake timers: база эмулируется в памяти,
-// respond сдвигает маркер на последнюю реплику, как сделает настоящий ответ.
+// End-to-end scenario on background sleep and fake timers: the database is emulated in
+// memory, and respond moves the marker to the latest message, as a real reply would.
 describe("сквозной дебаунс без очереди", () => {
   let messages;
   let answeredUpTo;
@@ -97,7 +97,7 @@ describe("сквозной дебаунс без очереди", () => {
       }),
     };
     const respond = async (_windowId, marker) => {
-      if (marker !== answeredUpTo) return; // аренда по устаревшему маркеру не берётся
+      if (marker !== answeredUpTo) return; // a lease on a stale marker isn't taken
       answeredUpTo = Math.max(...messages);
       responses.push({ at: Date.now(), covers: answeredUpTo });
     };
@@ -186,7 +186,7 @@ describe("onTranscript", () => {
 
   it("вовремя: проверка на последнюю реплику, не раньше паузы", async () => {
     const deps = baseDeps({ applied: true, late: false }, { latestId: 9, latestAt: 1_000 });
-    deps.now = () => 6_000; // последняя реплика 5 с назад
+    deps.now = () => 6_000; // the latest message was 5 s ago
     await onTranscript({ windowId: 1, messageId: 4, text: "t" }, deps);
     expect(deps.enqueue).toHaveBeenCalledWith(
       { windowId: 1, messageId: 9, kind: "debounce" },

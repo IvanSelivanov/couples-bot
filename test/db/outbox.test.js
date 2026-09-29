@@ -1,4 +1,4 @@
-// T7 на живой базе: ключ идемпотентности outbox и блокировка черновика (R13).
+// T7 on a live database: the outbox idempotency key and draft locking (R13).
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import * as db from "../../lib/db.js";
 import { OutcomeUnknown, deliver } from "../../lib/telegram.js";

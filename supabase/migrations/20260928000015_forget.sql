@@ -1,10 +1,10 @@
--- Удаление данных по просьбе (дизайн-док «Отзыв и удаление», DR16, DR20, R15).
+-- Deleting data on request (design doc "Revocation and deletion", DR16, DR20, R15).
 --
--- /forget        — личка, черновики, заметки и сводка dm:X владельца;
--- /forget_group  — общая история и сводка group; хватает одного партнёра;
---                  абьюз-флаги НЕ трогает (DR20): флаг — правило безопасности
---                  без текста переписки, и снять его одной командой нельзя;
--- /flag_clear    — только флаги dm:X самого X.
+-- /forget        — the owner's private chat, drafts, notes and the dm:X summary;
+-- /forget_group  — the shared history and the group summary; one partner is enough;
+--                  does NOT touch abuse flags (DR20): a flag is a safety rule
+--                  without conversation text, and one command can't remove it;
+-- /flag_clear    — only X's own dm:X flags.
 
 create function forget_member(p_user_id bigint)
 returns jsonb
@@ -41,7 +41,7 @@ begin
   with d as (delete from messages where couple_id = p_couple_id and scope in ('group', 'guest') returning 1)
   select count(*) into v_messages from d;
   delete from summaries where couple_id = p_couple_id and scope_key = 'group';
-  -- Окна без сообщений бессмысленны; маркеры ответа обнулятся вместе с ними.
+  -- Windows without messages are meaningless; reply markers go away with them.
   delete from windows where couple_id = p_couple_id;
   return jsonb_build_object('ok', true, 'messages', v_messages);
 end;
@@ -59,8 +59,8 @@ as $$
   select count(*)::integer from c;
 $$;
 
--- Был ли сигнал из лички X (активный флаг dm:X) — для предупреждения об
--- анонимности перед /pause и /revoke (дизайн-док «Паузы и отзыв не анонимны»).
+-- Whether there was a signal from X's private chat (an active dm:X flag), for the
+-- anonymity warning before /pause and /revoke (design doc "Pauses and revocation aren't anonymous").
 create function has_own_signal(p_user_id bigint)
 returns boolean
 language sql

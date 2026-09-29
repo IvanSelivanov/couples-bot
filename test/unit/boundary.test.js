@@ -1,5 +1,5 @@
-// Граница данных, статическая часть (дизайн-док, «Граница в коде»):
-// сырые чтения contextReads импортируют только context.js и draft.js.
+// The data boundary, static part (design doc, "Boundary in code"):
+// only context.js and draft.js import the raw contextReads.
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";

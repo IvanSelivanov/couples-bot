@@ -1,13 +1,13 @@
-// Потребитель отложенных проверок дебаунса (топик "debounce", R1).
-// Доставка at-least-once: повтор проверки безопасен — решение читается из
-// базы заново, а ответить может только владелец аренды (R2, R12).
+// Consumer of delayed debounce checks ("debounce" topic, R1).
+// Delivery is at-least-once: re-running a check is safe, the decision is read
+// from the database again and only the lease owner may reply (R2, R12).
 
 import { handleNodeCallback, vercelEnv } from "../lib/queue.js";
 import { respond, runCheck, scheduleTail } from "../lib/session.js";
 
 export default handleNodeCallback(
   async (check) => {
-    // Если хвост R11 не встанет в очередь, он ждёт сном внутри этой же доставки.
+    // If the R11 tail can't be queued, it waits with sleep inside this same delivery.
     const pending = [];
     const deps = { enqueue: vercelEnv().enqueue, defer: (p) => pending.push(p) };
     const respondWithTail = (w, m) => respond(w, m, { scheduleTail: (wi, mi) => scheduleTail(wi, mi, deps) });

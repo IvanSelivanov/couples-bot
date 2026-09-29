@@ -1,5 +1,5 @@
--- Обращение к боту (@упоминание или реплай на его сообщение) — ответ всегда,
--- speak не применяется (DR23). Признак ставится при приёме реплики.
+-- Addressing the bot (@mention or a reply to its message) always gets a reply;
+-- speak doesn't apply (DR23). The flag is set when the message is received.
 
 alter table messages add column addresses_bot boolean not null default false;
 

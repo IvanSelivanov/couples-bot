@@ -1,4 +1,4 @@
-// T29: одно окно на пару и приём реплики одной транзакцией (R21).
+// T29: one window per couple and message intake in one transaction (R21).
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { ingestGroupMessage } from "../../lib/db.js";
 import { connect, truncateAll, useLocalSupabase } from "./helpers.js";

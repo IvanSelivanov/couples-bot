@@ -1,4 +1,4 @@
-// T4: контракт обвязки Gemini (R5). Сеть и база подменены.
+// T4: the Gemini wrapper contract (R5). Network and database are stubbed.
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

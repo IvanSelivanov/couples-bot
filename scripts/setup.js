@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// Разовая настройка бота после деплоя (DR16, R10):
-//   node --env-file=.env scripts/setup.js https://<проект>.vercel.app
+// One-time bot setup after deploying (DR16, R10):
+//   node --env-file=.env scripts/setup.js https://<project>.vercel.app
 //
-// - setWebhook с секретом и тем же allowed_updates, что у локального polling;
-// - setMyCommands отдельно для групп и личек, на ru и en (остальные языки
-//   видят английский список).
+// - setWebhook with the secret and the same allowed_updates as local polling;
+// - setMyCommands separately for groups and private chats, in ru and en (other
+//   languages see the English list).
 
 import { call } from "../lib/telegram.js";
 import { ALLOWED_UPDATES } from "../lib/handle.js";

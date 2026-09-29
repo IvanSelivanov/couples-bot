@@ -1,4 +1,4 @@
-// T16 + T34: двуязычный формат, кнопки, уведомления, разбиение (DR1, DR17, DR18, R29).
+// T16 + T34: bilingual format, buttons, notifications, splitting (DR1, DR17, DR18, R29).
 import { describe, expect, it } from "vitest";
 import { FormatError, bilingual, keyboard, notification, pauseMessages, translationBlock } from "../../lib/format.js";
 

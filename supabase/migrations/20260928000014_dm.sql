@@ -1,19 +1,19 @@
--- Личка (T23): хранение с удалением по сроку при каждом сообщении (R24, R27),
--- черновики с ожиданием текста, предложения заметок не чаще раза за окно (DR11).
+-- Private chat (T23): storage with time-based deletion on every message (R24, R27),
+-- drafts waiting for text, note offers at most once per window (DR11).
 
--- Черновик ждёт текст (/draft без текста) или пожелание к правке (DR10).
+-- A draft waits for text (/draft without text) or for an edit request (DR10).
 alter table drafts drop constraint drafts_status_check;
 alter table drafts add constraint drafts_status_check
   check (status in ('awaiting_text', 'awaiting_edit', 'editing', 'sending', 'unknown'));
 
--- Заметка ждёт исправленного текста владельца (DR11 «Изменить»).
+-- A note waits for the owner's corrected text (DR11 "Edit").
 alter table notes add column awaiting_edit boolean not null default false;
 
--- Когда бот последний раз предлагал заметку этому участнику (DR11).
+-- When the bot last offered a note to this member (DR11).
 alter table members add column last_note_offer_at timestamptz;
 
--- Реплика лички: вставка и удаление строк владельца старше порога — одним
--- вызовом, чтобы обещание «до 7 дней» держалось и без cron (R27).
+-- A private message: insert and delete the owner's rows older than the threshold in
+-- one call, so the "up to 7 days" promise holds even without cron (R27).
 create function ingest_dm_message(
   p_couple_id bigint, p_owner bigint, p_author bigint, p_is_bot boolean,
   p_tg_message_id bigint, p_text text, p_kind text default 'text', p_retention_days integer default 6

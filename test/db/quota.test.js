@@ -1,4 +1,4 @@
-// quota_take: порог уровня и атомарность (R20, R31).
+// quota_take: tier threshold and atomicity (R20, R31).
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { quotaTake } from "../../lib/db.js";
 import { connect, truncateAll, useLocalSupabase } from "./helpers.js";
@@ -10,7 +10,7 @@ beforeEach(() => truncateAll(sql));
 
 describe("quota_take", () => {
   it("пускает до порога уровня и не дальше", async () => {
-    // лимит 10, уровень 70% → ровно 7 запросов
+    // limit 10, 70% tier → exactly 7 requests
     const results = [];
     for (let i = 0; i < 9; i++) results.push(await quotaTake(10, 70));
     expect(results.filter((r) => r.allowed)).toHaveLength(7);

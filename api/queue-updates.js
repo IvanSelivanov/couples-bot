@@ -1,14 +1,14 @@
-// Потребитель очереди апдейтов: Vercel зовёт эту функцию на каждое
-// сообщение топика "updates" (триггер в vercel.json). Доставка
-// at-least-once, дубли отсекает processUpdate (R3, R10).
+// Consumer of the updates queue: Vercel calls this function for every
+// message on the "updates" topic (trigger in vercel.json). Delivery is
+// at-least-once; processUpdate drops duplicates (R3, R10).
 
 import { openUpdate, processUpdate } from "../lib/ingest.js";
 import { handleUpdate } from "../lib/handle.js";
 import { handleNodeCallback, vercelEnv } from "../lib/queue.js";
 import { CryptoError } from "../lib/crypto.js";
 
-// Потолок повторов: после него апдейт считается безнадёжным. Сутки хранения
-// сообщения по умолчанию всё равно ограничивают попытки.
+// Retry ceiling: after it the update is considered hopeless. The default
+// one-day message retention limits attempts anyway.
 const MAX_DELIVERIES = 12;
 
 export default handleNodeCallback(
@@ -18,7 +18,7 @@ export default handleNodeCallback(
   },
   {
     retry: (error, metadata) => {
-      // Шифротекст не открылся (потерян ключ, подмена) — повтор не поможет.
+      // The ciphertext didn't open (lost key, tampering): retrying won't help.
       if (error instanceof CryptoError) {
         console.error(`[queue] апдейт не расшифрован, снимаем с очереди: ${error.message}`);
         return { acknowledge: true };
@@ -27,7 +27,7 @@ export default handleNodeCallback(
         console.error(`[queue] ${metadata.deliveryCount} неудачных доставок, снимаем с очереди`);
         return { acknowledge: true };
       }
-      // 10 с → 20 с → 40 с → … не больше 5 минут.
+      // 10 s → 20 s → 40 s → … at most 5 minutes.
       return { afterSeconds: Math.min(300, 5 * 2 ** metadata.deliveryCount) };
     },
   },

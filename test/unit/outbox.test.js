@@ -1,4 +1,4 @@
-// T7: отправка без дублей (R13). Сеть и база подменены.
+// T7: sending without duplicates (R13). Network and database are stubbed.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { OutcomeUnknown, TelegramError, deliver, send } from "../../lib/telegram.js";
 import { FAILED_DELIVERY_TEXT, UNKNOWN_DELIVERY_TEXT, publishDraft } from "../../lib/draft.js";

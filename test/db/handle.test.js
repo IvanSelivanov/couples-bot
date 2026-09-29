@@ -1,5 +1,5 @@
-// Маршрутизация группы сквозь живую базу: приём, команды, /check, голосовые.
-// Модель и Telegram подменены, база настоящая.
+// Group routing end to end on a live database: intake, commands, /check, voice.
+// Model and Telegram are stubbed, the database is real.
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { handleUpdate } from "../../lib/handle.js";
 import { connect, truncateAll, useLocalSupabase } from "./helpers.js";

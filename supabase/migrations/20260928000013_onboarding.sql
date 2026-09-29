@@ -1,12 +1,12 @@
--- Онбординг в личке по шагам (DR7, DR8, DR5, T19): язык → страна → время →
--- согласие. Шаг хранится у участника; группа знает закреплённый статус.
+-- Step-by-step onboarding in the private chat (DR7, DR8, DR5, T19): language → country → time →
+-- consent. The step is stored on the member; the group knows the pinned status.
 
 alter table members add column onboarding_step text not null default 'lang'
   check (onboarding_step in ('lang', 'country', 'time', 'consent', 'done', 'declined'));
 alter table couples add column status_message_id bigint;
 
--- Регистрирует участника пары; третьего не пускает. Атомарно под блокировкой
--- пары: два партнёра, одновременно открывшие бота, не превратятся в троих.
+-- Registers a couple member; doesn't let a third one in. Atomic under the couple
+-- lock: two partners opening the bot at the same moment won't become three.
 create function join_couple(p_couple_id bigint, p_user_id bigint, p_name text, p_lang_hint text)
 returns jsonb
 language plpgsql
@@ -30,7 +30,7 @@ begin
 end;
 $$;
 
--- Согласие участника. Второе согласие активирует пару (onboarding → active).
+-- A member's consent. The second consent activates the couple (onboarding → active).
 create function give_consent(p_user_id bigint)
 returns jsonb
 language plpgsql

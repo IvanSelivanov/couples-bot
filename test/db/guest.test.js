@@ -1,4 +1,4 @@
-// T25: Guest Mode сквозь живую базу (DR12; «Guest Mode» в дизайн-доке).
+// T25: Guest Mode end to end on a live database (DR12; "Guest Mode" in the design doc).
 import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { handleUpdate } from "../../lib/handle.js";
@@ -152,7 +152,7 @@ describe("Guest Mode", () => {
     await sql`update members set tz = '+02:00' where user_id = ${Y}`;
     const h = env({ unavailable: "quota", reason: "level" });
     h.env.text = async (lang, key, params) => `${lang}:${key}:${params?.reset ?? ""}`;
-    h.env.now = () => Date.UTC(2026, 8, 29, 16, 0); // 09:00 по Тихоокеанскому, сброс в 07:00 UTC 30-го
+    h.env.now = () => Date.UTC(2026, 8, 29, 16, 0); // 09:00 Pacific, reset at 07:00 UTC on the 30th
     expect(await handleUpdate(guest(X, { id: Y, type: "private" }), h.env)).toBe("guest_fallback");
     expect(h.sent[0].params.result.input_message_content.message_text).toBe("ru:guest.quota:10:00\nes:guest.quota:09:00");
   });

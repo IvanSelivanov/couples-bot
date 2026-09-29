@@ -1,4 +1,4 @@
-// T28: ответ ведущего после паузы — все пути (R12, R13, R20, R29, R31, DR14, DR23).
+// T28: the helper's reply after a pause, every path (R12, R13, R20, R29, R31, DR14, DR23).
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { coupleLangs, nextQuotaReset, respond } from "../../lib/session.js";
 import { normalizePause, pausePrompt } from "../../lib/counsel.js";

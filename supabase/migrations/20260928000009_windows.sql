@@ -1,12 +1,12 @@
--- Окна разговора и приём реплики группы одной транзакцией (DR9, R21, R22, R26).
+-- Conversation windows and intake of a group message in one transaction (DR9, R21, R22, R26).
 --
 -- ingest_group_message:
---   1. блокирует строку пары — параллельные реплики обоих партнёров
---      обрабатываются по очереди (R21: одно открытое окно);
---   2. окно, молчащее дольше порога, закрывает и открывает новое;
---   3. вставляет реплику (дубль апдейта — on conflict, R3);
---   4. сдвигает last_message_at окна.
--- Возвращает id реплики, id окна и id только что закрытого окна (для итога, R30).
+--   1. locks the couple row, so parallel messages from both partners
+--      are processed one at a time (R21: one open window);
+--   2. a window silent for longer than the threshold is closed and a new one opened;
+--   3. inserts the message (duplicate update: on conflict, R3);
+--   4. moves the window's last_message_at.
+-- Returns the message id, the window id and the id of a just-closed window (for the recap, R30).
 
 create function open_or_get_window(p_couple_id bigint, p_silence_minutes integer default 30)
 returns jsonb
@@ -65,8 +65,8 @@ begin
 end;
 $$;
 
--- Первый опубликованный ответ ведущего в окне (DR23: итог только после него;
--- R30: опоздавший итог старого окна отбрасывается, если новое уже ответило).
+-- The helper's first published reply in the window (DR23: a recap only after it;
+-- R30: a late recap of the old window is dropped if the new one already replied).
 create function mark_first_reply(p_window_id bigint)
 returns void
 language sql

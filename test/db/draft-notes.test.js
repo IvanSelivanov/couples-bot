@@ -1,4 +1,4 @@
-// T23 часть 2: черновики (DR10) и заметки (DR11, R15) сквозь живую базу.
+// T23 part 2: drafts (DR10) and notes (DR11, R15) end to end on a live database.
 import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { handleUpdate } from "../../lib/handle.js";

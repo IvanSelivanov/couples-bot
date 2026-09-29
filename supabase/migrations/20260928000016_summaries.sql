@@ -1,7 +1,7 @@
--- Сводки и обслуживание по сроку (дизайн-док «Бюджет контекста», «Хранение»;
+-- Summaries and time-based maintenance (design doc "Context budget", "Retention";
 -- DR9, DR22, R10, R15, R24, R27, R30).
 
--- Окно с данными для итога (R30).
+-- A window with the data for the recap (R30).
 create function window_info(p_window_id bigint)
 returns jsonb
 language sql
@@ -14,8 +14,8 @@ as $$
   from windows w where w.id = p_window_id;
 $$;
 
--- Сводка скоупа: запись с covers_up_to, только вперёд (старая сводка не
--- перезаписывает более новую при гонке двух сворачиваний).
+-- A scope summary: written with covers_up_to, only forward (an old summary doesn't
+-- overwrite a newer one when two folds race).
 create function upsert_summary(p_couple_id bigint, p_scope_key text, p_text text, p_covers_up_to bigint)
 returns boolean
 language plpgsql
@@ -33,9 +33,9 @@ begin
 end;
 $$;
 
--- Ежедневная чистка по сроку. Лички старше порога удаляются всегда, даже
--- несвёрнутые (R24). Группа — только строки, покрытые сводкой и старше
--- 90 дней. Служебные таблицы — по своим срокам.
+-- Daily retention cleanup. Private chats older than the threshold are always deleted,
+-- even unfolded ones (R24). Group: only rows covered by a summary and older than
+-- 90 days. Service tables: by their own retention periods.
 create function cron_purge(
   p_dm_days integer default 6, p_group_days integer default 90,
   p_updates_days integer default 7, p_drafts_days integer default 7, p_outbound_days integer default 7
@@ -60,7 +60,7 @@ begin
 
   with d as (delete from processed_updates where status = 'done' and received_at < now() - make_interval(days => p_updates_days) returning 1)
   select count(*) into v_updates from d;
-  -- Зависшие received с шифротекстом старше срока лички тоже уходят (R27).
+  -- Stuck received rows with ciphertext older than the private retention go too (R27).
   delete from processed_updates where received_at < now() - make_interval(days => p_dm_days);
 
   with d as (delete from drafts where status <> 'sending' and created_at < now() - make_interval(days => p_drafts_days) returning 1)
@@ -69,7 +69,7 @@ begin
   with d as (delete from outbound where created_at < now() - make_interval(days => p_outbound_days) returning 1)
   select count(*) into v_outbound from d;
 
-  -- Остатки окон закрываются молча: итог — только при живом закрытии (DR9).
+  -- Leftover windows close silently: a recap only on a live close (DR9).
   with d as (
     update windows set ended_at = now(), lease_id = null, generating_until = null
      where ended_at is null and last_message_at < now() - interval '30 minutes'
@@ -82,8 +82,8 @@ begin
 end;
 $$;
 
--- Кандидаты на сворачивание.
--- Лички: разговор молчит 48 часов и есть несвёрнутые строки (DR22).
+-- Fold candidates.
+-- Private chats: the conversation has been silent for 48 hours and has unfolded rows (DR22).
 create function dm_fold_candidates(p_silence_hours integer default 48)
 returns table (couple_id bigint, owner_user_id bigint)
 language sql
@@ -98,7 +98,7 @@ as $$
      and max(m.id) > coalesce(s.covers_up_to, 0);
 $$;
 
--- Группа: несвёрнутых больше порога или старейшая несвёрнутая подходит к сроку.
+-- Group: more unfolded rows than the threshold, or the oldest unfolded one nears its deadline.
 create function group_fold_candidates(p_max_unsummarized integer default 80, p_age_days integer default 85)
 returns table (couple_id bigint)
 language sql
@@ -112,7 +112,7 @@ as $$
   having count(*) > p_max_unsummarized or min(m.created_at) < now() - make_interval(days => p_age_days);
 $$;
 
--- Строки лички, покрытые свежей сводкой, удаляются сразу (DR22).
+-- Private rows covered by a fresh summary are deleted at once (DR22).
 create function delete_covered_dm(p_couple_id bigint, p_owner bigint, p_covers_up_to bigint)
 returns integer
 language sql

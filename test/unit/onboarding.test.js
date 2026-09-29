@@ -1,4 +1,4 @@
-// T11: бот-админ и состав группы (R17).
+// T11: bot admin and group membership (R17).
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { affectsComposition, checkGroup, recheckComposition } from "../../lib/onboarding.js";
 
@@ -104,7 +104,7 @@ describe("помощники онбординга (DR5, DR8, T19)", async () => 
     const now = Date.UTC(2026, 8, 28, 12, 0);
     expect(offsetFromLocalTime("14:30", now)).toBe("+02:30");
     expect(offsetFromLocalTime("9:05", now)).toBe("-03:00");
-    // 01:00 при 12:00 UTC — это и +13, и −11; выбирается −11 (диапазон −12…+14).
+    // 01:00 at 12:00 UTC is both +13 and −11; −11 is chosen (range −12…+14).
     expect(offsetFromLocalTime("01:00", now)).toBe("-11:00");
     expect(offsetFromLocalTime("23:00", Date.UTC(2026, 8, 28, 1, 0))).toBe("-02:00");
     expect(offsetFromLocalTime("25:00", now)).toBeNull();
@@ -141,7 +141,7 @@ describe("помощники онбординга (DR5, DR8, T19)", async () => 
   it("кнопка «Другой язык» — последней", () => {
     const rows = languageKeyboard("ru", "Другой язык").inline_keyboard;
     expect(rows.flat()).toHaveLength(9);
-    // Отдельной строкой: в строке из трёх подпись обрезается до «Друг…язык».
+    // On its own row: in a row of three the label gets cut to «Друг…язык».
     expect(rows.at(-1)).toEqual([{ text: "Другой язык", callback_data: "ob:lang:other" }]);
   });
 

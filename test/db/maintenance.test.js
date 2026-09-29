@@ -1,4 +1,4 @@
-// Сводки, итог окна и cron на живой базе (DR9, DR22, DR23, R10, R18, R24, R30).
+// Summaries, window recap and cron on a live database (DR9, DR22, DR23, R10, R18, R24, R30).
 import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { foldDm, foldGroup, recapAndFold } from "../../lib/context.js";

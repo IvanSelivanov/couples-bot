@@ -1,5 +1,5 @@
-// T8: машина состояний пары на живой базе (R6, R12, R25, DR19).
-// Каждый переход × (окно открыто / /check активен).
+// T8: the couple state machine on a live database (R6, R12, R25, DR19).
+// Every transition × (window open / /check active).
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { canPublish, claimReplyWindow, coupleTransition } from "../../lib/db.js";
 import { connect, truncateAll, useLocalSupabase } from "./helpers.js";

@@ -1,4 +1,4 @@
-// T18: онбординг сквозь живую базу (DR7, DR8, R17). Telegram подменён.
+// T18: onboarding end to end on a live database (DR7, DR8, R17). Telegram is stubbed.
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { handleUpdate } from "../../lib/handle.js";
 import { signInvite } from "../../lib/onboarding.js";
@@ -62,7 +62,7 @@ describe("регистрация группы", () => {
     const h = env({ groupOk: false });
     h.env.text = async (lang, key, params) => `${lang}:${key}${params?.bot ? `:@${params.bot}` : ""}`;
     expect(await handleUpdate(groupStart(X), h.env)).toBe("not_admin");
-    // Просьба называет бота: пользователю надо найти его в списке при добавлении админа.
+    // The request names the bot: the user has to find it in the list when adding an admin.
     expect(h.sent[0].params.text).toBe("ru:onboarding.admin_request:@couples_test_bot");
     expect(await sql`select id from couples`).toHaveLength(0);
   });
@@ -99,14 +99,14 @@ describe("личка", () => {
     const id = await coupleId();
     const link = `/start ${signInvite(id)}`;
 
-    // María вступает по ссылке и проходит шаги.
+    // María joins via the link and goes through the steps.
     expect(await handleUpdate(dm(Y, link), h.env)).toBe("onboarding");
     await handleUpdate(tap(Y, "ob:lang:es"), h.env);
     await handleUpdate(tap(Y, "ob:country:ES"), h.env);
     await handleUpdate(dm(Y, "14:30"), h.env);
     await handleUpdate(tap(Y, "ob:consent:yes"), h.env);
 
-    // Иван уже участник (вызвал /start в группе) — проходит шаги в личке.
+    // Ivan is already a member (he sent /start in the group) and goes through the steps in private.
     await handleUpdate(dm(X, link, { name: "Иван", lang: "ru" }), h.env);
     await handleUpdate(tap(X, "ob:lang:ru"), h.env);
     await handleUpdate(dm(X, "Россия", { lang: "ru" }), h.env);

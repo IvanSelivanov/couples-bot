@@ -1,4 +1,4 @@
-// T23: помощник в личке сквозь живую базу. Модель и Telegram подменены.
+// T23: the private helper end to end on a live database. Model and Telegram are stubbed.
 import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { handleUpdate } from "../../lib/handle.js";
@@ -72,7 +72,7 @@ describe("личка", () => {
     await handleUpdate(dm(X, "новое"), env({ ok: true, data: { safety: "none", reply: "да" } }).env);
     const left = await sql`select owner_user_id, text from messages where scope = 'dm' and text = 'старое'`;
     expect(left).toHaveLength(0);
-    // Удаление только своих строк: чужую личку удалит её собственное сообщение или cron.
+    // Only one's own rows are deleted: someone else's chat is cleaned by their own message or by cron.
     expect(await sql`select id from messages where text = 'чужое старое'`).toHaveLength(1);
   });
 

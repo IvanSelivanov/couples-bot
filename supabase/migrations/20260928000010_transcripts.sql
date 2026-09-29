@@ -1,11 +1,11 @@
--- Ответ ведущего ждёт расшифровку голосовых (R22) и поздние результаты (R26).
+-- The helper's reply waits for voice transcriptions (R22), and late results (R26).
 --
---   голосовое ─▶ pending ─ расшифровка ─ CAS pending→done ─▶ текст, проверка дебаунса
---                  │                     └ уже failed ─────▶ текст с late = true, без проверки
---                  └ 120 с без результата ─ expire_transcripts ─▶ failed
+--   voice ─▶ pending ─ transcription ─ CAS pending→done ─▶ text, debounce check
+--            │         └ already failed ──▶ text with late = true, no check
+--            └ 120 s without a result ─ expire_transcripts ─▶ failed
 --
--- Статус меняется ровно один раз. claim_reply_window не выдаёт аренду, пока в
--- неотвеченном блоке есть pending: ответ ведущего всегда учитывает голосовые.
+-- The status changes exactly once. claim_reply_window grants no lease while the
+-- unanswered block has a pending one: the helper's reply always takes voice into account.
 
 create function expire_transcripts(p_couple_id bigint, p_seconds integer default 120)
 returns integer
@@ -21,7 +21,7 @@ as $$
   select count(*)::integer from expired;
 $$;
 
--- Результат расшифровки. { applied: true } — вовремя; { late: true } — после failed.
+-- Transcription result. { applied: true } means on time; { late: true } means after failed.
 create function set_transcript(p_message_id bigint, p_text text, p_lang text default null)
 returns jsonb
 language plpgsql
@@ -45,7 +45,7 @@ begin
     return jsonb_build_object('applied', false, 'late', true);
   end if;
 
-  -- done раньше (повтор доставки) или сообщения нет — ничего не делаем.
+  -- done earlier (repeated delivery) or no such message: do nothing.
   return jsonb_build_object('applied', false, 'late', false);
 end;
 $$;

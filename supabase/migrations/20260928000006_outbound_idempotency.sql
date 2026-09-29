@@ -1,14 +1,14 @@
--- Идемпотентность исходящих (R13, R27, R29).
+-- Idempotency of outgoing messages (R13, R27, R29).
 --
--- Ключ задаёт вызывающий: для ответа паузы «окно + целевой маркер + часть»,
--- для черновика «draft:<id>». Не аренда: задача, упавшая между отправкой и
--- finish_reply, повторяется уже с новой арендой, и ключ по аренде пропустил
--- бы дубль. Ключ по целевому маркеру ловит его: строка sent говорит «уже
--- отправлено, только заверши».
+-- The caller sets the key: for a pause reply "window + target marker + part",
+-- for a draft "draft:<id>". Not the lease: a task that died between sending and
+-- finish_reply is retried with a new lease, and a lease-based key would let a
+-- duplicate through. A key on the target marker catches it: a sent row says
+-- "already sent, just finish".
 --
--- Текст сообщения в outbox не хранится (payload всегда null): после
--- неизвестного исхода повтора нет, значит и текст не нужен, а текст лички
--- вне messages запрещает R27. Колонка остаётся nullable на будущее.
+-- The message text isn't stored in the outbox (payload is always null): there's no
+-- retry after an unknown outcome, so the text isn't needed, and private chat text
+-- outside messages is forbidden by R27. The column stays nullable for the future.
 
 alter table outbound add column idempotency_key text;
 alter table outbound alter column payload drop not null;

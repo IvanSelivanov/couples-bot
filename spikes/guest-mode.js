@@ -1,18 +1,18 @@
 #!/usr/bin/env node
-// Спайк Guest Mode (Bot API 10.0) — гейт перед основной работой.
-// Отвечает на вопросы, от которых зависит дизайн (DR12, R-решения про Guest):
-//   1. Приходит ли guest_message в личной переписке двух людей (1:1)?
-//   2. Есть ли в нём сообщение, на которое ответили (reply_to_message), и чьё оно?
-//   3. Есть ли from.language_code?
-//   4. Работает ли HTML с <blockquote expandable> в ответе answerGuestQuery?
-//   5. Сколько можно тянуть с ответом (SPIKE_DELAY_MS)?
-//   6. Можно ли потом отредактировать ответ по inline_message_id?
-//   7. Скачивается ли голосовое или кружок из reply_to_message?
+// Guest Mode spike (Bot API 10.0): a gate before the main work.
+// Answers the questions the design depends on (DR12, R decisions about Guest Mode):
+//   1. Does guest_message arrive in a private conversation between two people (1:1)?
+//   2. Does it include the replied-to message (reply_to_message), and whose is it?
+//   3. Is there a from.language_code?
+//   4. Does HTML with <blockquote expandable> work in an answerGuestQuery reply?
+//   5. How long can the reply be delayed (SPIKE_DELAY_MS)?
+//   6. Can the reply be edited later via inline_message_id?
+//   7. Can a voice message or video note from reply_to_message be downloaded?
 //
-//   npm run spike:guest            (нужен BOT_TOKEN в .env)
-//   SPIKE_DELAY_MS=60000 npm run spike:guest   — проверить долгий ответ
+//   npm run spike:guest            (needs BOT_TOKEN in .env)
+//   SPIKE_DELAY_MS=60000 npm run spike:guest   — test a slow reply
 //
-// Код одноразовый: в бота он не импортируется.
+// Throwaway code: the bot doesn't import it.
 
 import { call, download, getFile, TelegramError } from "../lib/telegram.js";
 
@@ -25,7 +25,7 @@ if (!me.supports_guest_queries) {
   console.log("Guest Mode выключен: BotFather → MiniApp → настройки бота → Guest Mode.");
 }
 
-// Вебхук и getUpdates несовместимы: если вебхук стоит, polling получит 409.
+// Webhook and getUpdates don't mix: while a webhook is set, polling gets 409.
 await call("deleteWebhook", { drop_pending_updates: false });
 
 console.log(`Жду guest_message. Задержка ответа: ${delayMs} мс. Ctrl-C — выход.\n`);
@@ -72,7 +72,7 @@ async function handleGuest(message) {
     keys: Object.keys(message),
   });
 
-  // 7. Можно ли скачать голосовое или кружок из реплая, если бота нет в чате?
+  // 7. Can a voice message or video note from the reply be downloaded when the bot isn't in the chat?
   const media = reply?.voice ?? reply?.video_note;
   if (media) {
     try {

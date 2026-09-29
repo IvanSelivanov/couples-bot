@@ -1,4 +1,4 @@
-// T15: каталог фиксированных текстов и машинный перевод с кешем (DR15, R23, DR17).
+// T15: the fixed text catalog and machine translation with a cache (DR15, R23, DR17).
 import { describe, expect, it, vi } from "vitest";
 import ru from "../../lib/copy/ru.js";
 import en from "../../lib/copy/en.js";

@@ -1,11 +1,11 @@
--- /check, speaker-listener (дизайн-док «/check», R14, R16, DR6).
+-- /check, speaker-listener (design doc "/check", R14, R16, DR6).
 --
--- Одно активное упражнение на пару; повтор не раньше чем через 30 минут
--- после начала прошлого — единственная причина отказа (D15, D17).
--- Переходы делаются условным UPDATE по (state, round): устаревшая кнопка
--- или двойное нажатие просто не находят строку.
+-- One active exercise per couple; a repeat no sooner than 30 minutes after the
+-- previous one started is the only reason to refuse (D15, D17).
+-- Transitions are a conditional UPDATE on (state, round): a stale button or a
+-- double tap simply doesn't find the row.
 
-alter table checks add column prompt_message_id bigint;     -- сообщение бота, на которое отвечает слушающий
+alter table checks add column prompt_message_id bigint;     -- the bot message the listener replies to
 alter table checks add column hinted boolean not null default false;
 alter table checks add column updated_at timestamptz not null default now();
 alter table checks add column outcome text;                 -- understood | discuss_more | skipped | timeout | cancelled
@@ -23,7 +23,7 @@ declare
   v_last  timestamptz;
   v_id    bigint;
 begin
-  -- Блокировка пары сериализует одновременные /check обоих партнёров.
+  -- Locking the couple serialises simultaneous /check from both partners.
   perform 1 from couples where id = p_couple_id for update;
 
   if exists (select 1 from checks where couple_id = p_couple_id and ended_at is null) then
@@ -49,7 +49,7 @@ $$;
 revoke execute on function check_start(bigint, bigint, bigint, bigint, bigint, integer) from public, anon, authenticated;
 grant execute on function check_start(bigint, bigint, bigint, bigint, bigint, integer) to service_role;
 
--- Пока /check активен, ответы по дебаунсу не генерируются (дизайн-док «/check»).
+-- While /check is active, no debounce replies are generated (design doc "/check").
 create or replace function debounce_state(p_window_id bigint)
 returns jsonb
 language sql

@@ -1,18 +1,18 @@
--- Аренда права ответить в окне разговора (R2, R11, R12).
+-- Lease on the right to reply in a conversation window (R2, R11, R12).
 --
--- Условие и время проверяет Postgres: у PostgREST-фильтров нет now(), а часы
--- инстансов Vercel не синхронны друг с другом. Поэтому CAS живёт здесь, а
--- lib/db.js зовёт эти функции через POST /rest/v1/rpc/<имя>.
+-- Postgres checks the condition and the time: PostgREST filters have no now(), and
+-- Vercel instance clocks aren't in sync with each other. So the CAS lives here, and
+-- lib/db.js calls these functions via POST /rest/v1/rpc/<name>.
 --
 --   claim_reply_window ─▶ lease_id | null
---        │ генерация (бюджет = срок аренды − 15 с)
+--        │ generation (budget = lease duration − 15 s)
 --        ▼
---   can_publish ─▶ true: отправить; false: молча выбросить ответ
+--   can_publish ─▶ true: send; false: silently drop the reply
 --        ▼
---   finish_reply ─▶ {ok, newer_message_id}: newer ≠ null — поставить новую
---                   проверку дебаунса на хвост (R11)
+--   finish_reply ─▶ {ok, newer_message_id}: newer ≠ null means schedule a new
+--                   debounce check for the tail (R11)
 
--- Захватывает окно, если маркер не сдвинулся и чужой живой аренды нет.
+-- Takes the window if the marker hasn't moved and there's no other live lease.
 create function claim_reply_window(p_window_id bigint, p_expected_marker bigint, p_lease_seconds integer default 90)
 returns uuid
 language sql
@@ -27,8 +27,8 @@ as $$
   returning lease_id;
 $$;
 
--- Право опубликовать ответ прямо перед sendMessage: аренда своя и живая,
--- окно открыто, пара active, состояние пары не менялось с начала генерации.
+-- The right to publish a reply right before sendMessage: the lease is ours and alive,
+-- the window is open, the couple is active, the couple's state hasn't changed since generation began.
 create function can_publish(p_window_id bigint, p_lease_id uuid, p_state_version integer)
 returns boolean
 language sql
@@ -47,9 +47,9 @@ as $$
   );
 $$;
 
--- Сдвигает маркер и снимает аренду, только если аренда своя. В той же
--- транзакции сообщает, пришли ли за время генерации новые реплики партнёров:
--- их никто не покроет, если не поставить для них новую проверку (R11).
+-- Moves the marker and releases the lease, only if the lease is ours. In the same
+-- transaction it reports whether new partner messages arrived during generation:
+-- nobody would cover them unless a new check is scheduled for them (R11).
 create function finish_reply(p_window_id bigint, p_lease_id uuid, p_new_marker bigint)
 returns jsonb
 language plpgsql
@@ -81,7 +81,7 @@ begin
 end;
 $$;
 
--- Функции доступны только серверу с service key.
+-- The functions are available only to the server with the service key.
 revoke execute on function claim_reply_window(bigint, bigint, integer) from public, anon, authenticated;
 revoke execute on function can_publish(bigint, uuid, integer) from public, anon, authenticated;
 revoke execute on function finish_reply(bigint, uuid, bigint) from public, anon, authenticated;

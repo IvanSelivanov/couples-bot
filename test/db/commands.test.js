@@ -1,4 +1,4 @@
-// T22: команды и меню лички сквозь живую базу (DR16, DR19, DR20, R25).
+// T22: private chat commands and menu end to end on a live database (DR16, DR19, DR20, R25).
 import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { handleUpdate } from "../../lib/handle.js";

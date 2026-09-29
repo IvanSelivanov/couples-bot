@@ -1,4 +1,4 @@
-// debounce_state на живой базе (R1, R11) и сквозной respond-каркас.
+// debounce_state on a live database (R1, R11) and the end-to-end respond skeleton.
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { debounceState } from "../../lib/db.js";
 import { respond, runCheck } from "../../lib/session.js";

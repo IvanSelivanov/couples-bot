@@ -1,5 +1,5 @@
-// Вебхук Telegram. Проверяет секрет и сохраняет апдейт долговечно до ответа
-// (lib/ingest.js). Никакой работы с содержимым здесь нет.
+// Telegram webhook. Checks the secret and stores the update durably before
+// responding (lib/ingest.js). No work on the update's content happens here.
 
 import { waitUntil } from "@vercel/functions";
 import { acceptUpdate, processUpdate, UPDATES_TOPIC } from "../lib/ingest.js";
@@ -7,7 +7,7 @@ import { handleUpdate } from "../lib/handle.js";
 import { send, vercelEnv } from "../lib/queue.js";
 
 export default async function handler(request, response) {
-  // Секрет первой строкой: чужие запросы не должны тратить ни очередь, ни базу.
+  // Secret check first: foreign requests must not cost queue or database work.
   const secret = process.env.WEBHOOK_SECRET;
   if (!secret || request.headers["x-telegram-bot-api-secret-token"] !== secret) {
     response.status(403).json({ ok: false });

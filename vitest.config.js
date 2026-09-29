@@ -1,7 +1,7 @@
-// Два набора тестов (eng review D8, D3):
-//   unit — чистая логика, без сети и без базы; гоняется на каждый чих;
-//   db   — настоящий Postgres из `supabase start`: гонки аренды, уникальные
-//          ключи и SQL-функции проверяются только на живой базе, моки их врут.
+// Two test suites (eng review D8, D3):
+//   unit — pure logic, no network and no database; run it all the time;
+//   db   — real Postgres from `supabase start`: lease races, unique keys and
+//          SQL functions can only be tested on a live database, mocks lie about them.
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -20,10 +20,10 @@ export default defineConfig({
           include: ["test/db/**/*.test.js"],
           environment: "node",
           globalSetup: ["test/db/setup.js"],
-          // Тесты делят одну базу, параллельные файлы стирали бы данные друг
-          // друга. Внутри project опция fileParallelism игнорируется, поэтому
-          // последовательный запуск задаёт флаг --no-file-parallelism в
-          // скрипте test:db.
+          // The tests share one database, so parallel files would wipe each
+          // other's data. fileParallelism is ignored inside a project, so
+          // sequential runs are forced by the --no-file-parallelism flag in
+          // the test:db script.
           testTimeout: 20_000,
         },
       },

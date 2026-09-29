@@ -1,4 +1,4 @@
-// T15 на живой базе: кеш переводов и пометка stale (R23, TD1).
+// T15 on a live database: the translation cache and the stale flag (R23, TD1).
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { copyCacheGet, copyCachePut } from "../../lib/db.js";
 import { connect, truncateAll, useLocalSupabase } from "./helpers.js";

@@ -1,4 +1,4 @@
-// T5: приём апдейта до ACK (R10, R19, R1, R27). База и очередь подменены.
+// T5: update intake before the ACK (R10, R19, R1, R27). Database and queue are stubbed.
 import { randomBytes } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { acceptUpdate, openUpdate, processUpdate } from "../../lib/ingest.js";

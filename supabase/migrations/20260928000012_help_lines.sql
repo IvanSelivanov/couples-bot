@@ -1,9 +1,9 @@
--- Номера помощи по странам (DR21; решение пользователя 2026-09-28: «заранее,
--- с кешем»). Кризисная ветка читает только этот кеш и статический запасной
--- вариант — модель в момент кризиса не нужна.
+-- Help-line numbers by country (DR21; decided 2026-09-28: "ahead of time,
+-- with a cache"). The crisis branch reads only this cache and the static
+-- fallback; no model is needed during a crisis.
 --
--- lines: [{ kind, name, phone, source_url }] — только проверенные: цифры
--- номера найдены на странице source_url при загрузке.
+-- lines: [{ kind, name, phone, source_url }], verified only: the number's digits
+-- were found on the source_url page when it was loaded.
 
 alter table members add column country text;  -- ISO 3166-1 alpha-2
 

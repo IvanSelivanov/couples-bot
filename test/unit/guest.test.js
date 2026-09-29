@@ -1,5 +1,5 @@
-// Guest Mode: какой чат считается личкой пары (DR12). Форма guest_message —
-// из спайка 2026-09-29, id заменены.
+// Guest Mode: which chat counts as the couple's 1:1 chat (DR12). The guest_message shape
+// comes from the 2026-09-29 spike, with ids replaced.
 import { describe, expect, it } from "vitest";
 import { isCoupleChat } from "../../lib/handle.js";
 

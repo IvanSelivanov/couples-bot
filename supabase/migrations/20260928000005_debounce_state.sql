@@ -1,6 +1,6 @@
--- Состояние дебаунса окна одним запросом (R1, R11): маркер ответа, последняя
--- и первая неотвеченная реплика партнёров в группе. Сообщения бота и личек
--- дебаунс не сбрасывают (дизайн-док, «Дебаунс»).
+-- A window's debounce state in one query (R1, R11): the reply marker, the latest
+-- and the first unanswered partner message in the group. Bot messages and private
+-- chats don't reset the debounce (design doc, "Debounce").
 
 create function debounce_state(p_window_id bigint)
 returns jsonb

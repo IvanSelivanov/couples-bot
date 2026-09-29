@@ -1,4 +1,4 @@
-// T10 на живой базе: запуск /check, частота, условные переходы.
+// T10 on a live database: starting /check, frequency, conditional transitions.
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { applyCheckEvent, startCheck } from "../../lib/session.js";
 import { debounceState } from "../../lib/db.js";

@@ -1,11 +1,11 @@
--- Дневной счётчик запросов к Gemini (дизайн-док, «Деградация»; R20, R31).
+-- Daily Gemini request counter (design doc, "Degradation"; R20, R31).
 --
--- День считается по тихоокеанскому времени: дневные квоты Gemini
--- сбрасываются в полночь PT. Решение и инкремент — одна атомарная операция,
--- иначе два параллельных вызова оба увидят 89% и оба пройдут на 90%.
+-- The day is counted in Pacific time: Gemini daily quotas reset at midnight PT.
+-- The decision and the increment are one atomic operation, otherwise two
+-- parallel calls would both see 89% and both get through at 90%.
 
--- Берёт один запрос, если после него доля не превысит порог уровня.
--- p_cutoff_pct — уровень вызова: 70, 90 или 100.
+-- Takes one request if the share after it doesn't exceed the tier's threshold.
+-- p_cutoff_pct is the call's tier: 70, 90 or 100.
 create function quota_take(p_daily_limit integer, p_cutoff_pct integer)
 returns jsonb
 language plpgsql

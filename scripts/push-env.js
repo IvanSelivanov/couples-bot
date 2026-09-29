@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// Заливает переменные окружения в Vercel production: секреты из .env, адрес и
-// ключ Supabase — из .env.production (прод отличается от локального Docker).
+// Pushes environment variables to Vercel production: secrets from .env, the
+// Supabase URL and key from .env.production (prod differs from local Docker).
 //
 //   npm run push-env
 //
-// Значения идут в vercel через stdin, не аргументом: в списке процессов и в
-// выводе их не видно. Скрипт печатает только имена.
+// Values go to vercel through stdin, not as arguments, so they don't show up
+// in the process list or in output. The script prints names only.
 
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";

@@ -1,17 +1,17 @@
-// Ежедневный cron Vercel (vercel.json → crons): обслуживание по сроку
-// (дизайн-док «Хранение», R10, R18, R24, DR22, T19). Проверяет CRON_SECRET;
-// каждый шаг изолирован — сбой одного не отменяет остальные. В ответ и лог
-// — только счётчики, без текста.
+// Daily Vercel cron (vercel.json → crons): time-based maintenance
+// (design doc "Retention", R10, R18, R24, DR22, T19). Checks CRON_SECRET;
+// each step is isolated, so one failing doesn't cancel the others. The
+// response and logs contain only counters, never text.
 //
-//   1. чистка по срокам (лички > 6 дней всегда, служебные таблицы)
-//   2. зависшие в фолбэке апдейты — дообработка (R10)
-//   3. сворачивание личек после 48 ч тишины, затем удаление покрытого (DR22)
-//   4. сворачивание общей истории по порогу (> 80 несвёрнутых или к сроку)
-//   5. номера помощи: страны без кеша или старше 30 дней (T19)
-//   6. перешифровка шифротекстов старой версии ключа (R18)
+//   1. retention cleanup (private chats older than 6 days always, service tables)
+//   2. updates stuck in the fallback path: finish processing them (R10)
+//   3. fold private chats after 48 h of silence, then delete what's covered (DR22)
+//   4. fold the shared history by threshold (> 80 unfolded, or when due)
+//   5. help-line numbers: countries without a cache or older than 30 days (T19)
+//   6. re-encrypt ciphertexts made with an old key version (R18)
 //
-// Сворачивание — уровень квоты 70%: на исчерпанном уровне шаг
-// останавливается, лички всё равно удаляются по сроку шагом 1 (R24).
+// Folding runs at the 70% quota tier: when that tier is exhausted the step
+// stops, and private chats are still deleted on schedule by step 1 (R24).
 
 import * as db from "../lib/db.js";
 import { foldDm, foldGroup, reencryptBatch } from "../lib/context.js";

@@ -1,4 +1,4 @@
-// T2: ограничения схемы, на которые опирается логика бота.
+// T2: schema constraints the bot's logic relies on.
 import { afterAll, beforeEach, describe, expect, inject, it } from "vitest";
 import { connect, createCouple, truncateAll } from "./helpers.js";
 
@@ -57,7 +57,7 @@ describe("RLS", () => {
     const response = await fetch(`${inject("restUrl")}/couples?select=id`, {
       headers: { apikey: inject("anonKey"), Authorization: `Bearer ${inject("anonKey")}` },
     });
-    // RLS без политик: запрос проходит, но строк не видно.
+    // RLS without policies: the query succeeds but no rows are visible.
     expect(await response.json()).toEqual([]);
   });
 

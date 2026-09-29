@@ -1,4 +1,4 @@
-// T10: редьюсер /check (дизайн-док «/check», R14, R16, DR6).
+// T10: the /check reducer (design doc "/check", R14, R16, DR6).
 import { describe, expect, it } from "vitest";
 import { CHECK_TIMEOUT_MS, checkReducer, decide, shouldOfferCheck } from "../../lib/session.js";
 

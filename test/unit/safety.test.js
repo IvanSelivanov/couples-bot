@@ -1,4 +1,4 @@
-// T19: набор помощи и реакция на сигналы (DR14, DR18, DR20, DR21).
+// T19: the help pack and the reaction to signals (DR14, DR18, DR20, DR21).
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   EMERGENCY_NUMBERS,
@@ -76,7 +76,7 @@ describe("helpPack (DR18, DR21)", () => {
 
   it("нейтральная первая строка, оба языка, строки стран, экстренные номера, каталог", async () => {
     const pack = await helpPack({ langs: ["ru", "es"], countries: ["ES", "RU"], cached }, { textFn });
-    // Первая видимая строка (превью на заблокированном экране) — нейтральная.
+    // The first visible line (the lock-screen preview) is neutral.
     expect(pack.startsWith("<b>ru:safety.neutral_first_line\nes:safety.neutral_first_line</b>")).toBe(true);
     expect(pack).toContain("Línea 016 (ES): 016");
     expect(pack).toContain("ES: 112");

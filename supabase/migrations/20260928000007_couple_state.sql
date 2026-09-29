@@ -1,21 +1,21 @@
--- Машина состояний пары (R6, R12, R25, DR19). Один атомарный переход в SQL:
--- строка пары блокируется, решение и все побочные эффекты — в одной
--- транзакции, иначе /pause посреди генерации ответа мог бы разойтись с
+-- Couple state machine (R6, R12, R25, DR19). One atomic transition in SQL:
+-- the couple row is locked, the decision and all side effects are in one
+-- transaction; otherwise a /pause in the middle of reply generation could diverge from
 -- can_publish.
 --
---              activate (/start + админ + 2 согласия)
---  onboarding ─────────────────────────────▶ active ◀── resume (только paused_by, DR19)
+--              activate (/start + admin + 2 consents)
+--  onboarding ─────────────────────────────▶ active ◀── resume (paused_by only, DR19)
 --                                              │  ▲
 --                                        pause │  │
 --                                              ▼  │
 --                                            paused
---  active/paused/suspended ── revoke ──▶ revoked ── consent (все согласны) ──▶ paused, если paused_by (R25) / active
---  active/paused ── suspend (третий / потеря админки) ──▶ suspended ── restore ──▶ paused, если paused_by / active
---  active ── crisis (в группе) ──▶ active: только закрыть окно и отменить /check
+--  active/paused/suspended ── revoke ──▶ revoked ── consent (everyone agreed) ──▶ paused if paused_by (R25), else active
+--  active/paused ── suspend (third person / admin lost) ──▶ suspended ── restore ──▶ paused if paused_by, else active
+--  active ── crisis (in the group) ──▶ active: only close the window and cancel /check
 --
--- Каждый выход из active (и crisis): закрыть открытое окно со снятием аренды,
--- отменить активный /check. Каждое изменение: state_version += 1 (R12), чтобы
--- уже идущая генерация не опубликовала ответ.
+-- Every exit from active (and crisis): close the open window releasing the lease,
+-- cancel the active /check. Every change: state_version += 1 (R12), so a
+-- generation already in progress doesn't publish its reply.
 
 create function couple_transition(p_couple_id bigint, p_event text, p_actor bigint default null)
 returns jsonb
@@ -42,7 +42,7 @@ begin
 
     when 'resume' then
       if c.state <> 'paused' then return jsonb_build_object('ok', false, 'reason', 'not_paused', 'state', c.state); end if;
-      -- DR19: снять паузу может только поставивший, всегда.
+      -- DR19: only the person who paused can resume, always.
       if c.paused_by is distinct from p_actor then
         return jsonb_build_object('ok', false, 'reason', 'not_pauser', 'state', c.state);
       end if;
@@ -61,10 +61,10 @@ begin
       select exists (select 1 from members where couple_id = p_couple_id and revoked_at is not null)
         into v_other_revoked;
       if v_other_revoked then
-        -- Согласие вернул один, второй всё ещё отозвал: пара остаётся revoked.
+        -- One partner gave consent back, the other still revoked: the couple stays revoked.
         return jsonb_build_object('ok', true, 'from', c.state, 'to', c.state, 'changed', false);
       end if;
-      -- R25: пауза переживает отзыв согласия.
+      -- R25: a pause survives consent revocation.
       v_to := case when c.paused_by is not null then 'paused' else 'active' end;
 
     when 'suspend' then
@@ -85,7 +85,7 @@ begin
       raise exception 'неизвестное событие пары: %', p_event;
   end case;
 
-  -- Выход из active и crisis: окно и /check останавливаются без отдельных сообщений.
+  -- Leaving active, and crisis: the window and /check stop without separate messages.
   if c.state = 'active' and (v_to <> 'active' or p_event = 'crisis') then
     update windows set ended_at = now(), lease_id = null, generating_until = null
      where couple_id = p_couple_id and ended_at is null;

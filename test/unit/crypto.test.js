@@ -1,4 +1,4 @@
-// T12: шифрование лички и ротация ключа (R18).
+// T12: private chat encryption and key rotation (R18).
 import { randomBytes } from "node:crypto";
 import { beforeEach, describe, expect, it } from "vitest";
 import { CryptoError, decrypt, encrypt, needsReencrypt } from "../../lib/crypto.js";

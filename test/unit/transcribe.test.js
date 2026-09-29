@@ -1,4 +1,4 @@
-// T27: расшифровка и показ транскрипта (DR25, R22).
+// T27: transcription and showing the transcript (DR25, R22).
 import { describe, expect, it, vi } from "vitest";
 import { showSummary, transcribeMedia, transcriptParts } from "../../lib/transcribe.js";
 
