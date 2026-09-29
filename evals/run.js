@@ -11,7 +11,7 @@
 // Код выхода 1, если хоть один порог не пройден — гейт запуска (R28).
 
 import { readFileSync } from "node:fs";
-import { generate } from "../lib/gemini.js";
+import { generate as rawGenerate } from "../lib/gemini.js";
 import { DM_SCHEMA, DM_SYSTEM, PAUSE_SCHEMA, PAUSE_SYSTEM, dmPrompt, normalizePause, pausePrompt } from "../lib/counsel.js";
 import { TRANSCRIBE_SCHEMA, TRANSCRIBE_SYSTEM } from "../lib/transcribe.js";
 
@@ -23,6 +23,22 @@ if (!apiKey) {
 const RUNS = Number(process.env.EVAL_RUNS ?? 3);
 const VERBOSE = process.env.EVAL_VERBOSE === "1"; // печатать ответы проваленных случаев
 const SETS = (process.env.EVAL_SETS ?? "speak,false_positive,safety,sycophancy,leak,charged,dm").split(",");
+
+// Free tier — 15 запросов в минуту на модель. Без паузы прогон упирается в 429
+// на первой же минуте; 4,5 с между запросами — около 13 в минуту.
+const MIN_INTERVAL_MS = Number(process.env.EVAL_MIN_INTERVAL_MS ?? 4500);
+let lastCall = 0;
+async function generate(args) {
+  // Сетевой сбой или 5xx — не повод обрывать прогон на полпути: две попытки.
+  for (let attempt = 0; ; attempt++) {
+    const wait = lastCall + MIN_INTERVAL_MS - Date.now();
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+    lastCall = Date.now();
+    const r = await rawGenerate(args);
+    if (r.ok || r.unavailable !== "error" || attempt >= 2) return r;
+    await new Promise((resolve) => setTimeout(resolve, 10_000));
+  }
+}
 
 const load = (name) => JSON.parse(readFileSync(new URL(`./data/${name}.json`, import.meta.url), "utf8"));
 
