@@ -5,11 +5,12 @@ import { waitUntil } from "@vercel/functions";
 import { acceptUpdate, processUpdate, UPDATES_TOPIC } from "../lib/ingest.js";
 import { handleUpdate } from "../lib/handle.js";
 import { send, vercelEnv } from "../lib/queue.js";
+import { webhookSecret } from "../lib/crypto.js";
 
 export default async function handler(request, response) {
   // Secret check first: foreign requests must not cost queue or database work.
-  const secret = process.env.WEBHOOK_SECRET;
-  if (!secret || request.headers["x-telegram-bot-api-secret-token"] !== secret) {
+  const secret = webhookSecret();
+  if (request.headers["x-telegram-bot-api-secret-token"] !== secret) {
     response.status(403).json({ ok: false });
     return;
   }
@@ -19,7 +20,7 @@ export default async function handler(request, response) {
   const status = await acceptUpdate(update, {
     enqueue: (message, options) => send(UPDATES_TOPIC, message, options),
     defer: waitUntil,
-    process: (u) => processUpdate(u, { handle: (x) => handleUpdate(x, vercelEnv()) }),
+    process: (u) => processUpdate(u, { handle: async (x) => handleUpdate(x, await vercelEnv()) }),
   });
 
   response.status(status).json({ ok: status === 200 });

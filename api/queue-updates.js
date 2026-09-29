@@ -14,7 +14,7 @@ const MAX_DELIVERIES = 12;
 export default handleNodeCallback(
   async ({ updateId, payload }) => {
     const update = openUpdate(updateId, payload);
-    await processUpdate(update, { handle: (u) => handleUpdate(u, vercelEnv()) });
+    await processUpdate(update, { handle: async (u) => handleUpdate(u, await vercelEnv()) });
   },
   {
     retry: (error, metadata) => {

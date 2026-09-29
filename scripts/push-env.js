@@ -16,6 +16,7 @@ const KEYS = [
   "WEBHOOK_SECRET",
   "SUPABASE_URL",
   "SUPABASE_SERVICE_KEY",
+  "SUPABASE_DB_URL",
   "GEMINI_API_KEY",
   "GEMINI_DAILY_LIMIT",
   "GEMINI_MODEL",
@@ -25,8 +26,18 @@ const KEYS = [
   "CRON_SECRET",
   "ADMIN_NAME",
 ];
-const OPTIONAL = new Set(["DM_ENCRYPTION_KEY_PREV", "GEMINI_MODEL"]);
-const FROM_PRODUCTION = new Set(["SUPABASE_URL", "SUPABASE_SERVICE_KEY"]);
+// Optional: derived or defaulted in code when empty (lib/crypto.js, lib/telegram.js, lib/gemini.js).
+const OPTIONAL = new Set([
+  "DM_ENCRYPTION_KEY_PREV",
+  "GEMINI_MODEL",
+  "GEMINI_DAILY_LIMIT",
+  "WEBHOOK_SECRET",
+  "CRON_SECRET",
+  "BOT_USERNAME",
+  "DM_ENCRYPTION_KEY_VERSION",
+  "SUPABASE_DB_URL",
+]);
+const FROM_PRODUCTION = new Set(["SUPABASE_URL", "SUPABASE_SERVICE_KEY", "SUPABASE_DB_URL"]);
 
 function parseEnvFile(path) {
   if (!existsSync(path)) return {};

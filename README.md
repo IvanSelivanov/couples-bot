@@ -62,164 +62,71 @@ controls the data.
 
 ## Set it up: step-by-step guide for beginners
 
-You don't need to be a programmer. You will copy commands into a terminal and
-fill in one settings file. Plan for about an hour. Everything here is free.
+You don't need to be a programmer or install anything. Everything happens in
+the browser and in Telegram, and everything here is free. Plan for about 30
+minutes.
 
 If you get stuck at any step, see [Stuck? Ask a free AI assistant](#stuck-ask-a-free-ai-assistant).
 
 ### What you need
 
-- A computer with macOS, Windows or Linux.
 - Telegram on your phone or computer.
 - A Google account (for the Gemini AI key).
-- Free accounts at [Supabase](https://supabase.com) (the database) and
-  [Vercel](https://vercel.com) (where the bot runs). You can sign up with Google
-  or GitHub.
+- A [GitHub](https://github.com/signup) account. Your copy of the bot's code
+  will live there. Signing up is free.
 
-### Step 1. Install Node.js
-
-Node.js runs the setup scripts.
-
-1. Go to [nodejs.org](https://nodejs.org) and download the **LTS** version.
-2. Run the installer and click through with the default options.
-3. Open a terminal:
-   - **macOS:** press `Cmd + Space`, type `Terminal`, press Enter.
-   - **Windows:** press the Windows key, type `PowerShell`, press Enter.
-4. Type this and press Enter:
-   ```sh
-   node --version
-   ```
-   You should see something like `v22.x` or `v24.x`. The number must be 22 or higher.
-
-### Step 2. Download the bot
-
-1. On the [project page](https://github.com/IvanSelivanov/couples-bot), click
-   the green **Code** button → **Download ZIP**.
-2. Unzip it somewhere easy to find, e.g. your Documents folder. You'll get a
-   folder named `couples-bot-main`.
-3. In the terminal, go into that folder. Type `cd ` (with a space at the end),
-   drag the folder from Finder or Explorer into the terminal window, and press Enter.
-4. Install the bot's parts:
-   ```sh
-   npm install
-   ```
-   This takes a minute. Warnings are fine; errors in red are not.
-
-**From now on, run every command in this folder.** If you close the terminal,
-repeat step 3 when you open it again.
-
-### Step 3. Create your Telegram bot
+### Step 1. Create your Telegram bot
 
 1. In Telegram, open [@BotFather](https://t.me/BotFather) and send `/newbot`.
 2. Choose a name (e.g. `Our helper`) and a username that ends in `bot`
    (e.g. `anna_and_tom_helper_bot`).
 3. BotFather replies with a **token** that looks like `123456789:AAH...`. Keep it
-   secret: whoever has it controls your bot.
+   secret: whoever has it controls your bot. You'll paste it in step 3.
 4. Turn on **Guest Mode**: in BotFather, open your bot's settings (tap **Open**
    to use the BotFather app, choose your bot) and switch Guest Mode on. This lets
    you call the bot in your 1:1 chat with your partner.
 
-### Step 4. Get a Gemini AI key
+### Step 2. Get a Gemini AI key
 
 1. Go to [Google AI Studio → API keys](https://aistudio.google.com/api-keys) and sign in.
 2. Click **Create API key**. When asked for a project, choose **Create project**
    and name it e.g. `couples-bot`. A separate project means the bot gets its own
    free daily limit.
-3. Copy the key.
+3. Copy the key. You'll paste it in step 3.
 
-### Step 5. Fill in the settings file
+### Step 3. Deploy
 
-1. In the `couples-bot-main` folder, make a copy of `.env.example` and name the
-   copy `.env`. On macOS the file is hidden: in Finder press
-   `Cmd + Shift + .` to show hidden files. On Windows, turn on
-   **View → Show → File name extensions** first, so you don't end up with `.env.txt`.
-2. Open `.env` in a plain text editor (TextEdit on macOS, Notepad on Windows)
-   and fill in:
+Click this button:
 
-   | Line | What to put there |
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FIvanSelivanov%2Fcouples-bot&project-name=couples-bot&repository-name=couples-bot&env=BOT_TOKEN,GEMINI_API_KEY,ADMIN_NAME,DM_ENCRYPTION_KEY&envDescription=Your%20Telegram%20bot%20token%2C%20a%20Gemini%20API%20key%2C%20your%20name%20for%20the%20consent%20text%2C%20and%20a%20passphrase%20%2816%2B%20characters%29%20that%20encrypts%20private%20chats.&envLink=https%3A%2F%2Fgithub.com%2FIvanSelivanov%2Fcouples-bot%23step-3-deploy&stores=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22supabase%22%2C%22productSlug%22%3A%22supabase%22%2C%22protocol%22%3A%22storage%22%7D%5D)
+
+1. **Sign in to Vercel with GitHub.** If you have no Vercel account, this creates
+   a free one (the **Hobby** plan).
+2. **Create the Git repository.** Vercel copies the bot's code into your GitHub
+   account. Keep the suggested name and make the repository **private** if asked.
+3. **Add Supabase** (the database). Click **Add** next to Supabase and follow
+   the prompts: create or connect a Supabase account, choose the **Free** plan,
+   and if you're asked for a region, pick **Frankfurt (eu-central-1)**, the one
+   closest to where the bot runs. Vercel connects the database for you.
+4. **Fill in four settings:**
+
+   | Setting | What to put there |
    |---|---|
-   | `BOT_TOKEN=` | the token from BotFather |
-   | `BOT_USERNAME=` | your bot's username, without `@` |
-   | `GEMINI_API_KEY=` | the key from AI Studio |
-   | `GEMINI_DAILY_LIMIT=` | `500` |
-   | `ADMIN_NAME=` | your name, as your partner knows you |
-   | `DM_ENCRYPTION_KEY_VERSION=` | `1` |
+   | `BOT_TOKEN` | the token from BotFather |
+   | `GEMINI_API_KEY` | the key from AI Studio |
+   | `ADMIN_NAME` | your name, as your partner knows you. The bot shows it to both of you: you are the person who can technically read the private chats |
+   | `DM_ENCRYPTION_KEY` | a passphrase of at least 16 characters that encrypts your private chats. Your password manager can generate one, or use 5 or more random words, e.g. `violet lantern orbit pickle seventeen`. **Save it somewhere safe:** if you lose it, the private chats can't be read anymore |
 
-3. Three lines need random secrets. Run this command three times, and paste
-   each result into one of the lines:
-   ```sh
-   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-   ```
-   → `WEBHOOK_SECRET=`, `CRON_SECRET=`.
-   For `DM_ENCRYPTION_KEY=` use this command instead:
-   ```sh
-   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-   ```
-   **Save `DM_ENCRYPTION_KEY` somewhere else too**, e.g. in your password
-   manager. If you lose it, the private chats can't be read anymore.
-4. Leave the other lines empty and save the file.
+5. Click **Deploy** and wait a couple of minutes. While building, the bot
+   creates its database tables and connects itself to Telegram.
+6. When you see the congratulations screen, the bot is online.
 
-Never share `.env` or post its contents anywhere: it contains everything
-needed to control your bot.
+If the build fails, open it: the last lines of the log say which setting is
+wrong and what to put there. Fix it in **Vercel → your project → Settings →
+Environment Variables**, then go to **Deployments**, open the ⋯ menu of the
+latest one and choose **Redeploy**.
 
-### Step 6. Create the database (Supabase)
-
-1. Sign up at [supabase.com](https://supabase.com) and click **New project**.
-   - Name: `couples-bot`.
-   - Database password: click **Generate a password**, then copy it and keep it
-     (e.g. in your password manager).
-   - Region: **Central EU (Frankfurt)** is the best match for the bot's settings.
-     Pick another region only if you know why.
-2. Wait until the project is ready (a minute or two).
-3. Look at the address bar: `supabase.com/dashboard/project/`**`abcdefghijklmnop`**.
-   That last part is your **project ref**.
-4. In the terminal, log in and create the tables:
-   ```sh
-   npx supabase login
-   npx supabase link --project-ref YOUR_PROJECT_REF
-   npx supabase db push
-   ```
-   `login` opens your browser to confirm. `link` asks for the database password
-   from step 1. `db push` asks for confirmation: press `Y`.
-5. In the Supabase dashboard open **Project Settings → API Keys → Legacy API
-   Keys** and reveal the **service_role** key. It's a long string starting
-   with `eyJ`.
-6. Create one more file in the folder, `.env.production`, with two lines:
-   ```
-   SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
-   SUPABASE_SERVICE_KEY=the service_role key
-   ```
-   This key gives full access to your database: keep it as secret as `.env`.
-
-### Step 7. Put the bot online (Vercel)
-
-1. Sign up at [vercel.com](https://vercel.com) (the free **Hobby** plan).
-2. In the terminal:
-   ```sh
-   npx vercel login
-   npx vercel link
-   ```
-   `link` asks a few questions: answer **yes** to set up the project, pick your
-   account, answer **no** to linking an existing project, and accept the
-   suggested defaults for the rest.
-3. Send your settings to Vercel:
-   ```sh
-   npm run push-env
-   ```
-   Every line should end with `ok`.
-4. Deploy:
-   ```sh
-   npx vercel deploy --prod
-   ```
-   At the end you'll see a line like `Aliased https://couples-bot-xyz.vercel.app`.
-   That address is your bot's home.
-5. Connect Telegram to it:
-   ```sh
-   npm run setup https://couples-bot-xyz.vercel.app
-   ```
-   Use your own address. You should see `Webhook set` and `Commands set`.
-
-### Step 8. Start using it
+### Step 4. Start using it
 
 1. In Telegram, create a group with just you and your partner, and add your bot.
 2. Make the bot an admin: tap the group name → **Edit** (the pencil on Android)
@@ -237,40 +144,44 @@ needed to control your bot.
 
 - **The bot doesn't answer in the group.** Check that it's an admin and that the
   group has exactly three members: the two of you and the bot.
-- **`npm run push-env` says `Not filled in: ...`.** The named lines in `.env` or
-  `.env.production` are empty.
-- **The bot answers "I can't answer right now" or talks about a limit.** The
-  free Gemini quota (500 requests a day) resets at midnight Pacific time.
-- **You changed something in `.env`.** Run `npm run push-env` and
-  `npx vercel deploy --prod` again.
-- **You want to see what the bot is doing.** Run
-  `npx vercel logs https://couples-bot-xyz.vercel.app` (your address) in the
-  folder. The logs never contain message text.
+- **The bot doesn't react to anything at all.** In Vercel, open your project →
+  **Deployments** and check that the latest production deployment is **Ready**.
+  If it failed, the end of its build log says why.
+- **The bot says it can't answer right now, or talks about a limit.** The free
+  Gemini quota (500 requests a day) resets at midnight Pacific time.
+- **You want to change a setting.** Edit it in **Settings → Environment
+  Variables**, then **Redeploy** the latest deployment.
+- **You want to see what the bot is doing.** Your project in Vercel →
+  **Logs**. The logs never contain message text.
+- **You want the latest version of the bot.** Your copy doesn't update itself.
+  Ask the AI assistant below how to pull changes from
+  `IvanSelivanov/couples-bot` into your repository; Vercel redeploys on every change.
 
 ## Stuck? Ask a free AI assistant
 
 A chat assistant can walk you through the steps above and read your error
 messages. [Google Gemini](https://gemini.google.com) is a good fit: it's free,
-you already have a Google account from step 4, and you can send it screenshots.
+you already have a Google account from step 2, and you can send it screenshots.
 The free versions of [ChatGPT](https://chatgpt.com) or [Claude](https://claude.ai)
 work just as well.
 
 Start a new chat, paste the prompt below, then paste this whole README after it.
 
 ```text
-You are helping me, a non-programmer, set up a Telegram bot called couples-bot on my own computer.
-I'll paste its README below. Follow the "Set it up: step-by-step guide for beginners" section.
+You are helping me, a non-programmer, set up a Telegram bot called couples-bot.
+The setup happens in the browser (Telegram, Google AI Studio, Vercel, Supabase, GitHub);
+there is no terminal. I'll paste the bot's README below. Follow its
+"Set it up: step-by-step guide for beginners" section.
 
 How to help me:
 - Go one step at a time. Give me one small action, then wait until I tell you it worked
   or show you what happened. Don't jump ahead.
-- My computer runs: [macOS / Windows / Linux — write yours].
-- Explain in plain words. If I have to type a command, show it in a separate block
-  and tell me where to type it.
+- Explain in plain words and tell me exactly where to click.
 - When something fails, ask me for the exact error text or a screenshot of it. Don't guess.
-- Never ask me to paste my tokens, keys or passwords into this chat. If you need to know
-  whether a value is right, ask me what it looks like (for example, how it starts and how
-  long it is), not the value itself. If a screenshot might show a key or token, remind me
+  If a Vercel build fails, ask me to open the build log and copy its last 20 lines.
+- Never ask me to paste my tokens, keys, passphrase or passwords into this chat. If you need
+  to know whether a value is right, ask me what it looks like (for example, how it starts and
+  how long it is), not the value itself. If a screenshot might show a key or token, remind me
   to cover it first.
 - If the README and what I see on screen don't match (websites change), help me find the
   closest equivalent instead of insisting on the README wording.
@@ -278,8 +189,7 @@ How to help me:
 Here is the README:
 ```
 
-Don't paste the contents of your `.env` or `.env.production` files into any
-chat, AI or not.
+Don't paste your bot token, keys or passphrase into any chat, AI or not.
 
 ## For developers
 
@@ -294,6 +204,52 @@ chat, AI or not.
   The bot tracks its own daily quota and degrades in steps as it runs out:
   summaries first, then group replies. Private chats keep working to the end.
 - Telegram Bot API over plain `fetch`.
+
+### How deploys work
+
+`vercel.json` runs `scripts/vercel-build.js` as the build command. On every
+build it checks the settings and fails with a readable list if something is
+missing (previews only warn). On production builds it also:
+
+1. applies database migrations with `supabase db push`, using
+   `SUPABASE_DB_URL` or the Supabase integration's `POSTGRES_URL_NON_POOLING`;
+2. sets the Telegram webhook and commands for `VERCEL_PROJECT_PRODUCTION_URL`.
+
+Secrets a one-click setup doesn't ask for have fallbacks:
+- `WEBHOOK_SECRET` is derived from the bot token;
+- `BOT_USERNAME` comes from `getMe`;
+- `DM_ENCRYPTION_KEY` may be a passphrase (stretched with scrypt) or a raw
+  32-byte base64 key;
+- without `CRON_SECRET`, `/api/cron` runs maintenance at most once per 20 hours,
+  guarded by a database lock.
+
+### Manual setup from the command line
+
+The same result as the Deploy button, but with your own Supabase project and the
+Vercel CLI. Needs Node.js 22+.
+
+```sh
+git clone https://github.com/IvanSelivanov/couples-bot && cd couples-bot
+npm install
+cp .env.example .env                  # fill in: see the comments in the file
+npx supabase login
+npx supabase projects create couples-bot --region eu-central-1 --org-id <org> --db-password <password>
+npx supabase link --project-ref <ref>
+```
+
+Create `.env.production` with `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` (the
+service_role key, or a `sb_secret_` key) and `SUPABASE_DB_URL` (the session
+pooler connection string from the Supabase dashboard's **Connect** dialog). Then:
+
+```sh
+npx vercel login
+npx vercel link                       # create a new project
+npm run push-env                      # .env and .env.production → Vercel production
+npx vercel deploy --prod              # migrations and Telegram setup run in the build
+```
+
+Connecting the Vercel project to your GitHub repository (Project → Settings → Git)
+makes every push to `main` deploy.
 
 ### Run locally
 
@@ -334,8 +290,9 @@ accepted.
 
 ### Rotating the encryption key
 
-Move the old key to `DM_ENCRYPTION_KEY_PREV`, put the new key in
-`DM_ENCRYPTION_KEY`, and increase `DM_ENCRYPTION_KEY_VERSION` by 1. The daily
+Move the old key or passphrase to `DM_ENCRYPTION_KEY_PREV`, put the new one in
+`DM_ENCRYPTION_KEY`, and set `DM_ENCRYPTION_KEY_VERSION` to the next number
+(it's 1 when unset). The daily
 cron re-encrypts old records. When its report shows `rewritten: 0`, remove
 `DM_ENCRYPTION_KEY_PREV`.
 

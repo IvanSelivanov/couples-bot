@@ -5,7 +5,7 @@ import { foldDm, foldGroup, recapAndFold } from "../../lib/context.js";
 import { recapWindow } from "../../lib/session.js";
 import { decrypt, encrypt } from "../../lib/crypto.js";
 import { sealUpdate } from "../../lib/ingest.js";
-import { runMaintenance } from "../../api/cron.js";
+import { authorize, runMaintenance } from "../../api/cron.js";
 import { connect, truncateAll, useLocalSupabase } from "./helpers.js";
 
 const sql = connect();
@@ -161,5 +161,28 @@ describe("cron", () => {
     expect(m.text.startsWith("v2.")).toBe(true);
     delete process.env.DM_ENCRYPTION_KEY_PREV;
     expect(decrypt(m.text, `dm:${X}`)).toBe("личное");
+  });
+});
+
+describe("cron без CRON_SECRET", () => {
+  it("первый вызов запускает обслуживание, повтор в течение 20 часов — нет", async () => {
+    delete process.env.CRON_SECRET;
+    const request = { headers: {} };
+    expect(await authorize(request)).toBe("run");
+    expect(await authorize(request)).toBe("too_soon");
+    await sql`update maintenance_runs set last_run_at = now() - interval '21 hours'`;
+    expect(await authorize(request)).toBe("run");
+  });
+
+  it("с CRON_SECRET — только с правильным заголовком, база не трогается", async () => {
+    process.env.CRON_SECRET = "s3cret";
+    try {
+      expect(await authorize({ headers: { authorization: "Bearer s3cret" } })).toBe("run");
+      expect(await authorize({ headers: { authorization: "Bearer nope" } })).toBe("forbidden");
+      expect(await authorize({ headers: {} })).toBe("forbidden");
+      expect(await sql`select * from maintenance_runs`).toHaveLength(0);
+    } finally {
+      delete process.env.CRON_SECRET;
+    }
   });
 });

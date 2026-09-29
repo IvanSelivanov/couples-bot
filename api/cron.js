@@ -1,6 +1,7 @@
 // Daily Vercel cron (vercel.json → crons): time-based maintenance
-// (design doc "Retention", R10, R18, R24, DR22, T19). Checks CRON_SECRET;
-// each step is isolated, so one failing doesn't cancel the others. The
+// (design doc "Retention", R10, R18, R24, DR22, T19). Checks CRON_SECRET, or
+// without it allows one run per 20 hours (see authorize below). Each step is
+// isolated, so one failing doesn't cancel the others. The
 // response and logs contain only counters, never text.
 //
 //   1. retention cleanup (private chats older than 6 days always, service tables)
@@ -86,13 +87,28 @@ export async function runMaintenance(deps = {}) {
   return report;
 }
 
-export default async function handler(request, response) {
+// Without CRON_SECRET anyone can call this URL, so a run is allowed at most
+// once per 20 hours (the schedule is daily). With CRON_SECRET, only Vercel.
+const MIN_INTERVAL_SECONDS = 20 * 60 * 60;
+
+/** @returns {Promise<"run"|"forbidden"|"too_soon">} */
+export async function authorize(request, { store = db } = {}) {
   const secret = process.env.CRON_SECRET;
-  if (!secret || request.headers.authorization !== `Bearer ${secret}`) {
+  if (secret) return request.headers.authorization === `Bearer ${secret}` ? "run" : "forbidden";
+  return (await store.maintenanceClaim(MIN_INTERVAL_SECONDS)) ? "run" : "too_soon";
+}
+
+export default async function handler(request, response) {
+  const verdict = await authorize(request);
+  if (verdict === "forbidden") {
     response.status(403).json({ ok: false });
     return;
   }
-  const report = await runMaintenance({ handle: (update) => handleUpdate(update, vercelEnv()) });
+  if (verdict === "too_soon") {
+    response.status(200).json({ ok: true, skipped: "ran recently" });
+    return;
+  }
+  const report = await runMaintenance({ handle: async (update) => handleUpdate(update, await vercelEnv()) });
   console.log("[cron]", JSON.stringify(report));
   response.status(200).json({ ok: true, report });
 }

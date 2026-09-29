@@ -1,4 +1,5 @@
 {
+  "buildCommand": "node scripts/vercel-build.js",
   "regions": [
     "fra1"
   ],

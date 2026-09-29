@@ -8,7 +8,7 @@
 // processUpdate is called without await: slow processing of one update doesn't
 // block polling, and errors are only logged.
 
-import { call, TelegramError } from "./lib/telegram.js";
+import { botUsername, call, TelegramError } from "./lib/telegram.js";
 import { processUpdate } from "./lib/ingest.js";
 import { ALLOWED_UPDATES, handleUpdate } from "./lib/handle.js";
 
@@ -39,7 +39,7 @@ for (;;) {
 
   for (const update of updates) {
     offset = update.update_id + 1;
-    processUpdate(update, { handle: (u) => handleUpdate(u, { botUsername: process.env.BOT_USERNAME }) }).catch((error) => {
+    processUpdate(update, { handle: async (u) => handleUpdate(u, { botUsername: await botUsername() }) }).catch((error) => {
       console.error(`[polling] update ${update.update_id} failed: ${error.name}: ${error.message}`);
     });
   }
