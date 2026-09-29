@@ -43,6 +43,25 @@ describe("notification (DR18)", () => {
 });
 
 describe("keyboard (DR17)", () => {
+  it("много коротких кнопок — строки по 3, подписи не обрезаются", () => {
+    const names = ["English", "Русский", "Español", "Deutsch", "Français", "Italiano", "Português", "Українська"];
+    const kb = keyboard(names.map((n, i) => ({ labels: [n], data: `l${i}` })));
+    expect(kb.inline_keyboard.map((row) => row.map((b) => b.text))).toEqual([
+      ["English", "Русский", "Español"],
+      ["Deutsch", "Français", "Italiano"],
+      ["Português", "Українська"],
+    ]);
+  });
+
+  it("строка не шире 30 символов подписей", () => {
+    const kb = keyboard([
+      { labels: ["Двенадцать12"], data: "a" },
+      { labels: ["Двенадцать12"], data: "b" },
+      { labels: ["Двенадцать12"], data: "c" },
+    ]);
+    expect(kb.inline_keyboard.map((row) => row.length)).toEqual([2, 1]);
+  });
+
   it("короткие двуязычные подписи — в одну строку", () => {
     const kb = keyboard([
       { labels: ["Слово", "Palabra"], data: "a" },
