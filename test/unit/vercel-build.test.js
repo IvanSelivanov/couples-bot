@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { build, checkSettings, migrationDbUrl } from "../../scripts/vercel-build.js";
 
 const GOOD = {
-  BOT_TOKEN: "123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw",
+  BOT_TOKEN: "123456789:test-only-not-a-real-token-xyz", // fake: matches the shape check, not a real token
   GEMINI_API_KEY: "key",
   ADMIN_NAME: "Ivan",
   DM_ENCRYPTION_KEY: "a long enough passphrase",
