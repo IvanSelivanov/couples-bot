@@ -15,13 +15,13 @@ import { ALLOWED_UPDATES, handleUpdate } from "./lib/handle.js";
 let offset;
 
 process.on("SIGINT", () => {
-  console.log("\nОстанавливаюсь.");
+  console.log("\nStopping.");
   process.exit(0);
 });
 
 // Webhook and getUpdates don't mix: Telegram answers 409 while a webhook is set.
 await call("deleteWebhook", { drop_pending_updates: false });
-console.log("Слушаю. Ctrl-C чтобы остановить.");
+console.log("Listening. Ctrl-C to stop.");
 
 for (;;) {
   let updates;
@@ -30,7 +30,7 @@ for (;;) {
     updates = await call("getUpdates", { timeout: 30, offset, allowed_updates: ALLOWED_UPDATES }, { timeoutMs: 40_000 });
   } catch (error) {
     if (error instanceof TelegramError || error.name === "TimeoutError") {
-      console.warn(`[polling] ${error.message}, повтор через 3 с`);
+      console.warn(`[polling] ${error.message}, retrying in 3 s`);
       await new Promise((resolve) => setTimeout(resolve, 3000));
       continue;
     }
@@ -40,7 +40,7 @@ for (;;) {
   for (const update of updates) {
     offset = update.update_id + 1;
     processUpdate(update, { handle: (u) => handleUpdate(u, { botUsername: process.env.BOT_USERNAME }) }).catch((error) => {
-      console.error(`[polling] апдейт ${update.update_id} упал: ${error.name}: ${error.message}`);
+      console.error(`[polling] update ${update.update_id} failed: ${error.name}: ${error.message}`);
     });
   }
 }

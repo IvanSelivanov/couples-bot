@@ -13,11 +13,11 @@ import en from "../lib/copy/en.js";
 
 const base = process.argv[2];
 if (!base?.startsWith("https://")) {
-  console.error("Укажи адрес деплоя: node --env-file=.env scripts/setup.js https://<проект>.vercel.app");
+  console.error("Pass the deployment URL: npm run setup https://<project>.vercel.app");
   process.exit(1);
 }
 if (!process.env.WEBHOOK_SECRET) {
-  console.error("WEBHOOK_SECRET не задан");
+  console.error("WEBHOOK_SECRET is not set in .env");
   process.exit(1);
 }
 
@@ -32,7 +32,7 @@ await call("setWebhook", {
   allowed_updates: ALLOWED_UPDATES,
   drop_pending_updates: false,
 });
-console.log("Вебхук установлен");
+console.log("Webhook set");
 
 for (const [scope, names] of [
   [{ type: "all_group_chats" }, GROUP],
@@ -41,4 +41,4 @@ for (const [scope, names] of [
   await call("setMyCommands", { scope, commands: commands(en, names) });
   await call("setMyCommands", { scope, language_code: "ru", commands: commands(ru, names) });
 }
-console.log("Команды установлены для групп и личек (ru, en)");
+console.log("Commands set for groups and private chats (ru, en)");

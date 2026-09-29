@@ -49,21 +49,23 @@ for (const key of KEYS) {
   else if (!OPTIONAL.has(key)) missing.push(`${key} (${FROM_PRODUCTION.has(key) ? ".env.production" : ".env"})`);
 }
 if (missing.length) {
-  console.error(`Не заполнено: ${missing.join(", ")}`);
+  console.error(`Not filled in: ${missing.join(", ")}`);
   process.exit(1);
 }
 if (/localhost|127\.0\.0\.1/.test(values.SUPABASE_URL)) {
-  console.error("SUPABASE_URL в .env.production указывает на локальный Supabase.");
+  console.error("SUPABASE_URL in .env.production points to the local Supabase.");
   process.exit(1);
 }
 
 for (const [key, value] of Object.entries(values)) {
-  const r = spawnSync("vercel", ["env", "add", key, "production", "--force", "--sensitive"], {
+  // npx: works without a global Vercel CLI install.
+  const r = spawnSync("npx", ["--yes", "vercel", "env", "add", key, "production", "--force", "--sensitive"], {
     input: value,
     stdio: ["pipe", "ignore", "pipe"],
+    shell: process.platform === "win32",
   });
   if (r.status !== 0) {
-    console.error(`${key}: ошибка\n${r.stderr.toString().trim()}`);
+    console.error(`${key}: failed\n${r.stderr.toString().trim()}`);
     process.exit(1);
   }
   console.log(`${key}: ok`);
