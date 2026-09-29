@@ -134,11 +134,27 @@ describe("Guest Mode", () => {
     expect(broken.env.generate).not.toHaveBeenCalled();
   });
 
-  it("пара не active — «не могу ответить» без модели", async () => {
-    await sql`update couples set state = 'revoked'`;
+  it.each([
+    ["onboarding", "guest.not_ready"],
+    ["paused", "guest.paused"],
+    ["revoked", "guest.revoked"],
+    ["suspended", "guest.suspended"],
+  ])("пара %s — причина и что сделать, без модели", async (state, key) => {
+    await sql`update couples set state = ${state}`;
     const h = env();
     expect(await handleUpdate(guest(X, { id: Y, type: "private" }), h.env)).toBe("guest_inactive");
     expect(h.env.generate).not.toHaveBeenCalled();
+    expect(h.sent[0].params.result.input_message_content.message_text).toBe(`ru:${key}\nes:${key}`);
+  });
+
+  it("квота исчерпана — время, когда бот снова ответит, по поясу каждого", async () => {
+    await sql`update members set tz = '+03:00' where user_id = ${X}`;
+    await sql`update members set tz = '+02:00' where user_id = ${Y}`;
+    const h = env({ unavailable: "quota", reason: "level" });
+    h.env.text = async (lang, key, params) => `${lang}:${key}:${params?.reset ?? ""}`;
+    h.env.now = () => Date.UTC(2026, 8, 29, 16, 0); // 09:00 по Тихоокеанскому, сброс в 07:00 UTC 30-го
+    expect(await handleUpdate(guest(X, { id: Y, type: "private" }), h.env)).toBe("guest_fallback");
+    expect(h.sent[0].params.result.input_message_content.message_text).toBe("ru:guest.quota:10:00\nes:guest.quota:09:00");
   });
 });
 
