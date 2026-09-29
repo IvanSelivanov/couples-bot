@@ -156,3 +156,18 @@ describe("помощники онбординга (DR5, DR8, T19)", async () => 
     expect(parseLanguage("")).toBeNull();
   });
 });
+
+describe("отказ команды объясняет причину", async () => {
+  const { refusalKey } = await import("../../lib/commands.js");
+  it.each([
+    [{ reason: "not_active", state: "onboarding" }, "pause", "state.why_onboarding"],
+    [{ reason: "not_active", state: "paused" }, "pause", "state.why_paused"],
+    [{ reason: "not_allowed", state: "revoked" }, "revoke", "state.why_revoked"],
+    [{ reason: "not_active", state: "suspended" }, "pause", "state.why_suspended"],
+    [{ reason: "not_paused", state: "active" }, "resume", "state.not_paused"],
+    [{ reason: "not_revoked", state: "active" }, "consent", "data.consent_already"],
+    [{ reason: "not_pauser", state: "paused" }, "resume", "state.resume_not_pauser"],
+  ])("%j %s → %s", (t, op, key) => {
+    expect(refusalKey(t, op)).toBe(key);
+  });
+});

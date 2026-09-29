@@ -124,6 +124,20 @@ describe("личка", () => {
     expect(h.env.refreshHelpLines).toHaveBeenCalledWith("ES");
   });
 
+  it("команда в группе до конца настройки — причина и кнопка «Открыть бота»", async () => {
+    const h = env();
+    await handleUpdate(groupStart(X), h.env);
+    const id = await coupleId();
+    const translate = {
+      update_id: updateId++,
+      message: { message_id: messageId++, chat: { id: CHAT, type: "supergroup" }, from: { id: X, first_name: "Иван", language_code: "ru" }, text: "/translate" },
+    };
+    await handleUpdate(translate, h.env);
+    const reply = h.sent.at(-1).params;
+    expect(reply.text).toContain("ru:state.why_onboarding");
+    expect(reply.reply_markup.inline_keyboard[0][0].url).toBe(`https://t.me/couples_test_bot?start=${signInvite(id)}`);
+  });
+
   it("другой язык: кнопка → просьба написать → язык по названию", async () => {
     const h = env();
     await handleUpdate(groupStart(X), h.env);
