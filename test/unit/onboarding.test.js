@@ -98,7 +98,7 @@ describe("affectsComposition", () => {
 });
 
 describe("помощники онбординга (DR5, DR8, T19)", async () => {
-  const { offsetFromLocalTime, parseCountry, signInvite, statusLine, verifyInvite, languageKeyboard } = await import("../../lib/onboarding.js");
+  const { offsetFromLocalTime, parseCountry, parseLanguage, signInvite, statusLine, verifyInvite, languageKeyboard } = await import("../../lib/onboarding.js");
 
   it("время → смещение пояса с шагом 15 минут", () => {
     const now = Date.UTC(2026, 8, 28, 12, 0);
@@ -136,5 +136,22 @@ describe("помощники онбординга (DR5, DR8, T19)", async () => 
 
   it("язык из Telegram — первой кнопкой (DR8)", () => {
     expect(languageKeyboard("es-ES").inline_keyboard.flat()[0].callback_data).toBe("ob:lang:es");
+  });
+
+  it("кнопка «Другой язык» — последней", () => {
+    const buttons = languageKeyboard("ru", "Другой язык").inline_keyboard.flat();
+    expect(buttons).toHaveLength(9);
+    expect(buttons.at(-1)).toEqual({ text: "Другой язык", callback_data: "ob:lang:other" });
+  });
+
+  it("язык по названию: на языке пользователя, по-английски, самоназванием, кодом", () => {
+    expect(parseLanguage("турецкий", ["ru"])).toBe("tr");
+    expect(parseLanguage("Turkish")).toBe("tr");
+    expect(parseLanguage("Türkçe")).toBe("tr");
+    expect(parseLanguage("  Polski ")).toBe("pl");
+    expect(parseLanguage("japonés", ["es"])).toBe("ja");
+    expect(parseLanguage("ka")).toBe("ka");
+    expect(parseLanguage("эльфийский", ["ru"])).toBeNull();
+    expect(parseLanguage("")).toBeNull();
   });
 });

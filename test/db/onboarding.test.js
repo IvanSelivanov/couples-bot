@@ -124,6 +124,21 @@ describe("личка", () => {
     expect(h.env.refreshHelpLines).toHaveBeenCalledWith("ES");
   });
 
+  it("другой язык: кнопка → просьба написать → язык по названию", async () => {
+    const h = env();
+    await handleUpdate(groupStart(X), h.env);
+    const link = `/start ${signInvite(await coupleId())}`;
+    await handleUpdate(dm(Y, link, { lang: "tr" }), h.env);
+    await handleUpdate(tap(Y, "ob:lang:other"), h.env);
+    expect(h.sent.at(-1).params.text).toBe("tr:onboarding.language_hint");
+    await handleUpdate(dm(Y, "эльфийский", { lang: "tr" }), h.env);
+    expect(h.sent.at(-1).params.text).toBe("tr:onboarding.bad_language");
+    await handleUpdate(dm(Y, "Türkçe", { lang: "tr" }), h.env);
+    expect(h.sent.at(-1).params.text).toBe("tr:onboarding.pick_country");
+    const [m] = await sql`select lang, onboarding_step from members where user_id = ${Y}`;
+    expect([m.lang, m.onboarding_step]).toEqual(["tr", "country"]);
+  });
+
   it("«Не сейчас» — никаких следов в группе, повторный /start снова спрашивает согласие", async () => {
     const h = env();
     await handleUpdate(groupStart(X), h.env);
