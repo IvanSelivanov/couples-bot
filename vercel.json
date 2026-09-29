@@ -3,7 +3,10 @@
     "fra1"
   ],
   "functions": {
-    "api/*.js": {
+    "api/index.js": {
+      "maxDuration": 300
+    },
+    "api/cron.js": {
       "maxDuration": 300
     },
     "api/queue-updates.js": {
