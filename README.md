@@ -56,16 +56,30 @@ npm run eval                # промпты на живой модели, ну�
 
 ## Деплой
 
-1. **Supabase.** Создать проект в регионе **eu-central-1 (Frankfurt)** — рядом с
-   функциями Vercel `fra1` (T13). Применить миграции:
-   `npx supabase link --project-ref <ref>` и `npx supabase db push`.
-2. **Vercel.** Создать проект из этого репо. Регион функций уже задан:
-   `"regions": ["fra1"]` в `vercel.json`. Включить Vercel Queues для проекта.
-3. **Переменные** в Vercel — все из `.env.example`, кроме `SPIKE_*` и `EVAL_*`.
+1. **Логины:** `vercel login`, `npx supabase login`.
+2. **Supabase.** Проект в регионе **eu-central-1 (Frankfurt)**, рядом с функциями
+   Vercel `fra1` (T13):
+   ```sh
+   npx supabase projects create couples-bot --region eu-central-1 --org-id <org> --db-password <пароль>
+   npx supabase link --project-ref <ref>
+   npx supabase db push
+   npx supabase projects api-keys --project-ref <ref>   # ключ service_role
+   ```
+   В `.env.production` (в git не попадает):
+   `SUPABASE_URL=https://<ref>.supabase.co` и `SUPABASE_SERVICE_KEY=<service_role>`.
+3. **Vercel.** `vercel link` (новый проект). Регион функций задан в
+   `vercel.json` (`fra1`), очереди — триггерами там же; OIDC для
+   `@vercel/queue` включён по умолчанию.
+4. **Переменные:** `npm run push-env` — секреты из `.env`, Supabase из
+   `.env.production`, только в production, значения идут через stdin.
    `DM_ENCRYPTION_KEY` сохранить ещё где-нибудь вне Vercel: потерянный ключ =
    потерянные лички.
-4. **Вебхук и команды:** `npm run setup https://<проект>.vercel.app`.
-5. Добавить бота в группу пары, дать права администратора, написать в группе `/start`.
+5. **Деплой:** `vercel deploy --prod`.
+6. **Вебхук и команды:** `npm run setup https://<проект>.vercel.app`.
+   Локальный `npm run bot` и спайк после этого не запускать: `getUpdates`
+   снимает вебхук.
+7. Добавить бота в группу пары, дать права администратора (только «Закреплять
+   сообщения»), написать в группе `/start`.
 
 ## Ротация ключа шифрования
 

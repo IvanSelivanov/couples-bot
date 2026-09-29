@@ -15,6 +15,7 @@
     "db:reset": "supabase db reset",
     "spike:guest": "node --env-file=.env spikes/guest-mode.js",
     "setup": "node --env-file=.env scripts/setup.js",
+    "push-env": "node scripts/push-env.js",
     "eval": "node --env-file=.env evals/run.js"
   },
   "dependencies": {
