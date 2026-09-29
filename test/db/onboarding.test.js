@@ -60,8 +60,10 @@ async function coupleId() {
 describe("регистрация группы", () => {
   it("бот не админ — просьба о правах, пара не создаётся", async () => {
     const h = env({ groupOk: false });
+    h.env.text = async (lang, key, params) => `${lang}:${key}${params?.bot ? `:@${params.bot}` : ""}`;
     expect(await handleUpdate(groupStart(X), h.env)).toBe("not_admin");
-    expect(h.sent[0].params.text).toBe("ru:onboarding.admin_request");
+    // Просьба называет бота: пользователю надо найти его в списке при добавлении админа.
+    expect(h.sent[0].params.text).toBe("ru:onboarding.admin_request:@couples_test_bot");
     expect(await sql`select id from couples`).toHaveLength(0);
   });
 
