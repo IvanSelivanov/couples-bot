@@ -12,7 +12,7 @@
 
 import { readFileSync } from "node:fs";
 import { generate } from "../lib/gemini.js";
-import { PAUSE_SCHEMA, PAUSE_SYSTEM, normalizePause, pausePrompt } from "../lib/counsel.js";
+import { DM_SCHEMA, DM_SYSTEM, PAUSE_SCHEMA, PAUSE_SYSTEM, dmPrompt, normalizePause, pausePrompt } from "../lib/counsel.js";
 import { TRANSCRIBE_SCHEMA, TRANSCRIBE_SYSTEM } from "../lib/transcribe.js";
 
 const apiKey = process.env.EVAL_GEMINI_API_KEY;
@@ -22,7 +22,7 @@ if (!apiKey) {
 }
 const RUNS = Number(process.env.EVAL_RUNS ?? 3);
 const VERBOSE = process.env.EVAL_VERBOSE === "1"; // печатать ответы проваленных случаев
-const SETS = (process.env.EVAL_SETS ?? "speak,false_positive,safety,sycophancy,leak,charged").split(",");
+const SETS = (process.env.EVAL_SETS ?? "speak,false_positive,safety,sycophancy,leak,charged,dm").split(",");
 
 const load = (name) => JSON.parse(readFileSync(new URL(`./data/${name}.json`, import.meta.url), "utf8"));
 
@@ -84,13 +84,13 @@ const BANNED = [
 // Бот о себе в женском роде: «я поняла», «я заметила».
 const FEMININE_SELF = /\bя\s+(?:\S+\s+)?(понял|заметил|услышал|увидел|подумал)а\b/i;
 
-function voiceProblems(reply) {
+function voiceProblems(reply, { maxSentences = 3 } = {}) {
   const problems = [];
   for (const { lang, text } of reply) {
     if (BANNED.some((re) => re.test(text))) problems.push(`штамп (${lang})`);
     // Только конечные знаки: ¿ и ¡ открывают предложение, а не делят его.
     const sentences = text.split(/[.!?…]+/).filter((s) => s.trim().length > 2).length;
-    if (sentences > 3) problems.push(`длиннее 3 предложений (${lang})`);
+    if (sentences > maxSentences) problems.push(`длиннее ${maxSentences} предложений (${lang})`);
     if ((text.match(/\?/g) ?? []).length > 1) problems.push(`больше одного вопроса (${lang})`);
     if (lang === "ru" && FEMININE_SELF.test(text)) problems.push("женский род бота (ru)");
   }
@@ -224,7 +224,42 @@ async function evalCharged() {
   gate("charged: саммари напряжённым = 0 (DR25)", wrong.filter((w) => /v[456]/.test(w)).length, 0, wrong.join("; "));
 }
 
-const ALL = { speak: evalSpeak, false_positive: evalFalsePositive, safety: evalSafety, sycophancy: evalSycophancy, leak: evalLeak, charged: evalCharged };
+// Личка (DM_SYSTEM): друг, а не психолог — без пересказа чувств, без выдуманных
+// событий, один вопрос в конце.
+async function evalDm() {
+  const { cases, rubric } = load("dm");
+  const owner = { name: "Иван", lang: "ru" };
+  const partner = { name: "Света", lang: "ru" };
+  const failed = [];
+  for (const c of cases) for (let i = 0; i < RUNS; i++) {
+    const context = {
+      abuseFlagActive: false,
+      summaries: { group: null, dm: null },
+      notes: [],
+      ownerUserId: AUTHOR.X,
+      shared: c.shared.map(([who, text]) => ({ author_user_id: AUTHOR[who], is_bot: false, text })),
+      dm: [{ is_bot: false, text: c.message }],
+    };
+    const r = await generate({ purpose: "dm_reply", system: DM_SYSTEM, parts: [{ text: dmPrompt(context, owner, partner) }], schema: DM_SCHEMA, apiKey, skipQuota: true });
+    if (!r.ok) throw new Error(`модель недоступна: ${r.unavailable ?? r.blocked}`);
+    const reply = [{ lang: "ru", text: String(r.data.reply ?? "") }];
+    const problems = voiceProblems(reply, { maxSentences: 4 });
+    // Судье — те же имена, что видела модель, иначе «Света» для него выдумка.
+    const names = { X: owner.name, Y: partner.name };
+    const dialog = [
+      ["(context)", `${owner.name} writes privately to the helper about his partner ${partner.name}`],
+      ...c.shared.map(([who, text]) => [names[who], text]),
+      [`${owner.name} (private, to the helper)`, c.message],
+    ];
+    const verdict = await judge(rubric, dialog, reply);
+    if (!verdict.pass) problems.push(...verdict.failed);
+    failed.push(...problems.map((p) => `${c.id}: ${p}`));
+    if (VERBOSE && problems.length) console.log(`  ${c.id}: ${reply[0].text}`);
+  }
+  gate("личка: без психологизмов и выдумок, один вопрос", failed.length, 0, failed.slice(0, 10).join("; "));
+}
+
+const ALL = { speak: evalSpeak, false_positive: evalFalsePositive, safety: evalSafety, sycophancy: evalSycophancy, leak: evalLeak, charged: evalCharged, dm: evalDm };
 for (const set of SETS) {
   if (!ALL[set]) throw new Error(`нет набора ${set}`);
   console.log(`— ${set}`);

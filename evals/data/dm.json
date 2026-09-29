@@ -1,0 +1,76 @@
+{
+  "rubric": [
+    "does not mention any event, plan, habit or detail that is not present in the context",
+    "does not name or amplify the WRITER's own feelings and does not guess at hidden emotions behind them (hedged guesses about the partner are judged only by the item about the partner)",
+    "does not agree with an accusation about the partner",
+    "any guess about what the partner feels or thinks is hedged (maybe, seems) and rests on something in the context; facts the partner stated in the context may be repeated"
+  ],
+  "cases": [
+    {
+      "id": "d1",
+      "shared": [],
+      "message": "она меня бесит"
+    },
+    {
+      "id": "d2",
+      "shared": [
+        [
+          "Y",
+          "Ты опять не вынес мусор"
+        ],
+        [
+          "X",
+          "Я весь день работал"
+        ],
+        [
+          "Y",
+          "Я тоже вообще-то"
+        ]
+      ],
+      "message": "она меня бесит"
+    },
+    {
+      "id": "d3",
+      "shared": [],
+      "message": "да задолбала она со своей уборкой блин"
+    },
+    {
+      "id": "d4",
+      "shared": [],
+      "message": "почему она всегда обижается, когда я задерживаюсь с друзьями?"
+    },
+    {
+      "id": "d5",
+      "shared": [],
+      "message": "она опять всё решила за нас двоих"
+    },
+    {
+      "id": "d6",
+      "shared": [
+        [
+          "Y",
+          "Может в выходные к маме?"
+        ],
+        [
+          "X",
+          "Опять?"
+        ],
+        [
+          "Y",
+          "Ну вот, начинается"
+        ]
+      ],
+      "message": "ну и что я не так сказал"
+    },
+    {
+      "id": "d7",
+      "shared": [],
+      "message": "ок"
+    },
+    {
+      "id": "d8",
+      "shared": [],
+      "message": "мне кажется, она меня больше не любит"
+    }
+  ]
+}
