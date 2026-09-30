@@ -1,6 +1,6 @@
 // debounce_state on a live database (R1, R11) and the end-to-end respond skeleton.
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { debounceState } from "../../lib/db.js";
+import { contextReads, debounceState, ingestHelperReply } from "../../lib/db.js";
 import { respond, runCheck } from "../../lib/session.js";
 import { addPartnerMessage, connect, createCouple, truncateAll, useLocalSupabase } from "./helpers.js";
 
@@ -40,6 +40,20 @@ describe("debounce_state", () => {
     await sql`insert into messages (couple_id, scope, is_bot, text) values (${coupleId}, 'group', true, 'бот')`;
     await sql`insert into messages (couple_id, scope, owner_user_id, author_user_id, text) values (${coupleId}, 'dm', 1, 1, 'x')`;
     expect((await debounceState(windowId)).latestId).toBe(Number(m1));
+  });
+
+  it("ответ ведущего сохраняется один раз и не сбивает дебаунс", async () => {
+    const { coupleId, windowId } = await createCouple(sql);
+    const m1 = await addPartnerMessage(sql, coupleId);
+    const reply = { coupleId, text: "Что он сказал перед этим?", tgChatId: -100, tgMessageId: 555 };
+    await ingestHelperReply(reply);
+    await ingestHelperReply(reply); // a retried task
+    const rows = await sql`select is_bot, author_user_id, text from messages where couple_id = ${coupleId} and is_bot`;
+    expect(rows).toEqual([{ is_bot: true, author_user_id: null, text: "Что он сказал перед этим?" }]);
+    expect((await debounceState(windowId)).latestId).toBe(Number(m1));
+    // The next pause call sees it in the shared history.
+    const shared = await contextReads.sharedMessages(coupleId, 40);
+    expect(shared.at(-1)).toMatchObject({ is_bot: true, text: "Что он сказал перед этим?" });
   });
 
   it("нет окна — null", async () => {

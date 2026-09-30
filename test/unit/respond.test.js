@@ -48,6 +48,7 @@ function harness({ generateResult, ctx = context(), canPublish = true, outboundS
     outboundStatus: vi.fn().mockResolvedValue(outboundStatus),
     canPublish: vi.fn().mockResolvedValue(canPublish),
     markFirstReply: vi.fn().mockResolvedValue(),
+    ingestHelperReply: vi.fn().mockResolvedValue(),
   };
   const sent = [];
   const deps = {
@@ -87,6 +88,10 @@ describe("respond", () => {
     expect(sent[0].params.text).toContain("Otra vez llegaste tarde");
     expect(store.markFirstReply).toHaveBeenCalledWith(1);
     expect(store.finishReply).toHaveBeenCalledWith(1, "lease-1", 11);
+    // The reply goes into the shared history so the next call sees what the helper said.
+    expect(store.ingestHelperReply).toHaveBeenCalledWith(
+      expect.objectContaining({ coupleId: 7, tgMessageId: 901, text: expect.stringContaining("Иван") }),
+    );
   });
 
   it("speak=false: только тихие переводы реплаями, итог окна не отмечается", async () => {
@@ -95,6 +100,7 @@ describe("respond", () => {
     expect(sent.map((m) => m.params.reply_parameters.message_id)).toEqual([10, 11]);
     expect(sent.every((m) => m.params.disable_notification)).toBe(true);
     expect(store.markFirstReply).not.toHaveBeenCalled();
+    expect(store.ingestHelperReply).not.toHaveBeenCalled();
     expect(store.finishReply).toHaveBeenCalledWith(1, "lease-1", 11);
   });
 
